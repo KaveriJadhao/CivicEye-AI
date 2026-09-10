@@ -1,4 +1,4 @@
-// CivicEye Nagpur - Core Application Controller
+// CivicEye - Clean, Intuitive Frontend Application Controller
 let currentReports = [];
 let currentFilter = {
   category: "All",
@@ -9,7 +9,7 @@ let currentFilter = {
   sortBy: "newest",
 };
 
-let currentTab = "feed"; // 'feed', 'file-report', 'track-ticket', 'leaderboard', 'notices', 'admin'
+let currentTab = "feed";
 let userKarma = parseInt(localStorage.getItem("civicKarma") || "140");
 let userIdentifier = localStorage.getItem("civicUserToken") || "citizen_" + Math.random().toString(36).substring(2, 8);
 localStorage.setItem("civicUserToken", userIdentifier);
@@ -17,7 +17,7 @@ localStorage.setItem("civicUserToken", userIdentifier);
 let categoryChartInstance = null;
 let currentActiveReport = null;
 
-// Initialize App
+// Initialize
 document.addEventListener("DOMContentLoaded", () => {
   updateKarmaDisplay();
   setupNavListeners();
@@ -41,7 +41,7 @@ function addKarma(amount) {
   }
 }
 
-// Navigation Tabs
+// Navigation
 function setupNavListeners() {
   const navBtns = document.querySelectorAll(".nav-tab-btn");
   navBtns.forEach((btn) => {
@@ -51,7 +51,6 @@ function setupNavListeners() {
     });
   });
 
-  // Top Ward Selector dropdown
   const topWardFilter = document.getElementById("topWardFilter");
   if (topWardFilter) {
     topWardFilter.addEventListener("change", (e) => {
@@ -59,38 +58,18 @@ function setupNavListeners() {
       loadReports();
     });
   }
-
-  // Quick track button in hero banner
-  const heroTrackBtn = document.getElementById("heroTrackBtn");
-  const heroTrackInput = document.getElementById("heroTrackInput");
-  if (heroTrackBtn && heroTrackInput) {
-    heroTrackBtn.addEventListener("click", () => {
-      const val = heroTrackInput.value.trim();
-      if (val) {
-        trackTicketDirectly(val);
-      }
-    });
-    heroTrackInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        const val = heroTrackInput.value.trim();
-        if (val) trackTicketDirectly(val);
-      }
-    });
-  }
 }
 
 function switchTab(tab) {
   currentTab = tab;
 
-  // Update Nav links
+  // Update Nav links styling
   const navBtns = document.querySelectorAll(".nav-tab-btn");
   navBtns.forEach((b) => {
     if (b.getAttribute("data-tab") === tab) {
-      b.classList.add("bg-blue-800", "text-white");
-      b.classList.remove("text-blue-100", "hover:bg-blue-900/60");
+      b.className = "nav-tab-btn px-3.5 py-1.5 rounded-lg bg-white text-blue-700 shadow-sm font-bold transition";
     } else {
-      b.classList.remove("bg-blue-800", "text-white");
-      b.classList.add("text-blue-100", "hover:bg-blue-900/60");
+      b.className = "nav-tab-btn px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition";
     }
   });
 
@@ -104,8 +83,8 @@ function switchTab(tab) {
   if (tab === "feed") {
     loadReports();
     setTimeout(() => window.CivicMap.initMainMap(), 100);
-  } else if (tab === "admin") {
-    loadAdminDashboard();
+  } else if (tab === "analytics" || tab === "admin") {
+    loadAnalyticsAndAdmin();
   } else if (tab === "file-report") {
     setTimeout(() => window.CivicMap.initReportPickerMap(), 200);
   }
@@ -116,8 +95,8 @@ function setupFilterListeners() {
   const chips = document.querySelectorAll(".category-chip");
   chips.forEach((chip) => {
     chip.addEventListener("click", () => {
-      chips.forEach((c) => c.classList.remove("chip-active", "bg-blue-600", "text-white"));
-      chip.classList.add("chip-active", "bg-blue-600", "text-white");
+      chips.forEach((c) => c.className = "category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shrink-0 transition");
+      chip.className = "category-chip chip-active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white border border-transparent shrink-0 shadow-sm transition";
       currentFilter.category = chip.getAttribute("data-category") || "All";
       loadReports();
     });
@@ -129,7 +108,7 @@ function setupFilterListeners() {
 
   if (statusFilter) statusFilter.addEventListener("change", (e) => { currentFilter.status = e.target.value; loadReports(); });
   if (sortByFilter) sortByFilter.addEventListener("change", (e) => { currentFilter.sortBy = e.target.value; loadReports(); });
-  
+
   if (searchInput) {
     let debounce;
     searchInput.addEventListener("input", (e) => {
@@ -146,8 +125,8 @@ async function loadReports() {
     if (feedContainer) {
       feedContainer.innerHTML = `
         <div class="col-span-full text-center py-12">
-          <i class="fa-solid fa-circle-notch fa-spin text-blue-600 text-3xl mb-3"></i>
-          <p class="text-slate-500 font-semibold text-xs">Loading municipal grievance feed...</p>
+          <i class="fa-solid fa-circle-notch fa-spin text-blue-600 text-2xl mb-2"></i>
+          <p class="text-slate-500 font-medium text-xs">Loading community reports...</p>
         </div>
       `;
     }
@@ -162,20 +141,22 @@ async function loadReports() {
   }
 }
 
-// Render feed cards
+// Render clean issue cards
 function renderFeed(reports) {
   const container = document.getElementById("reportsFeed");
   const countBadge = document.getElementById("activeReportCount");
-  if (countBadge) countBadge.innerText = `${reports.length} Registered Issues`;
+  if (countBadge) countBadge.innerText = `${reports.length} Reports`;
 
   if (!container) return;
 
   if (reports.length === 0) {
     container.innerHTML = `
       <div class="col-span-full bg-white p-8 rounded-2xl text-center border border-slate-200">
-        <i class="fa-solid fa-clipboard-check text-slate-300 text-5xl mb-3"></i>
-        <h4 class="text-base font-bold text-slate-700">No Civic Issues Found</h4>
-        <p class="text-slate-500 text-xs mt-1">No active reports match the selected filters for this ward.</p>
+        <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl mb-2">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <h4 class="text-sm font-bold text-slate-800">No Issues Found</h4>
+        <p class="text-slate-500 text-xs mt-1">No active reports match this category or search filter.</p>
       </div>
     `;
     return;
@@ -183,65 +164,53 @@ function renderFeed(reports) {
 
   container.innerHTML = reports
     .map((rep) => {
-      const urgencyClass =
+      const urgencyBadge =
         rep.urgencyLevel === "CRITICAL"
-          ? "bg-red-50 text-red-700 border-red-200"
+          ? "bg-red-50 text-red-700 border border-red-200"
           : rep.urgencyLevel === "HIGH"
-          ? "bg-orange-50 text-orange-700 border-orange-200"
+          ? "bg-orange-50 text-orange-700 border border-orange-200"
           : rep.urgencyLevel === "MEDIUM"
-          ? "bg-amber-50 text-amber-700 border-amber-200"
-          : "bg-emerald-50 text-emerald-700 border-emerald-200";
+          ? "bg-amber-50 text-amber-700 border border-amber-200"
+          : "bg-emerald-50 text-emerald-700 border border-emerald-200";
 
-      const statusBadgeClass =
+      const statusBadge =
         rep.status === "RESOLVED"
-          ? "bg-emerald-600 text-white"
+          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
           : rep.status === "IN_PROGRESS"
-          ? "bg-blue-600 text-white"
+          ? "bg-blue-50 text-blue-700 border border-blue-200"
           : rep.status === "ASSIGNED"
-          ? "bg-purple-600 text-white"
-          : "bg-slate-200 text-slate-800";
+          ? "bg-purple-50 text-purple-700 border border-purple-200"
+          : "bg-slate-100 text-slate-700 border border-slate-200";
 
       const isUpvoted = rep.upvotedBy && rep.upvotedBy.includes(userIdentifier);
       const timeAgo = getTimeAgo(new Date(rep.createdAt));
 
       return `
-      <div class="gov-card overflow-hidden flex flex-col justify-between">
+      <div class="clean-card overflow-hidden flex flex-col justify-between">
         <div>
-          <!-- Thumbnail & Badges -->
-          <div class="relative h-44 w-full bg-slate-100 overflow-hidden cursor-pointer" onclick="CivicApp.openDetailModal('${rep._id || rep.id}')">
+          <!-- Thumbnail Image -->
+          <div class="relative h-40 w-full bg-slate-100 overflow-hidden cursor-pointer" onclick="CivicApp.openDetailModal('${rep._id || rep.id}')">
             <img src="${rep.imageUrl || 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600'}" 
                  class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
                  alt="${rep.title}"
                  onerror="this.src='https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600'"/>
             
-            <div class="absolute top-2.5 left-2.5 flex gap-1.5">
-              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-md ${statusBadgeClass} shadow">
+            <div class="absolute top-2.5 left-2.5 flex gap-1">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBadge} shadow-sm">
                 ${rep.status.replace("_", " ")}
               </span>
-              ${
-                rep.isDuplicate
-                  ? `<span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-500 text-white shadow">
-                      Merged
-                    </span>`
-                  : ""
-              }
             </div>
 
             <div class="absolute top-2.5 right-2.5">
-              <span class="text-[11px] font-bold px-2 py-0.5 rounded-md border ${urgencyClass} bg-white/95 shadow-sm">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${urgencyBadge} shadow-sm">
                 ${rep.urgencyLevel}
               </span>
-            </div>
-
-            <div class="absolute bottom-2 left-2 right-2 bg-slate-900/85 backdrop-blur rounded-lg px-2.5 py-1 text-white text-[11px] flex justify-between items-center">
-              <span>🏛️ ${rep.assignedDepartment || "Municipal Corp"}</span>
-              <span>⏱️ SLA: ${rep.estimatedSlaHours || 48}h</span>
             </div>
           </div>
 
           <!-- Body -->
           <div class="p-4">
-            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1 font-mono-code font-semibold">
+            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1 font-mono font-semibold">
               <span>${rep.ticketId}</span>
               <span>${timeAgo}</span>
             </div>
@@ -250,20 +219,20 @@ function renderFeed(reports) {
               ${rep.title}
             </h3>
 
-            <p class="text-xs text-slate-600 line-clamp-2 mb-2.5">
+            <p class="text-xs text-slate-500 line-clamp-2 mb-3">
               ${rep.description}
             </p>
 
-            <div class="flex items-center text-xs text-slate-500 font-medium mb-2.5">
-              <i class="fa-solid fa-location-dot text-red-500 mr-1.5 shrink-0"></i>
-              <span class="truncate">${rep.address || rep.wardNumber || "Nagpur Ward Area"}</span>
+            <div class="flex items-center text-xs text-slate-500 font-medium mb-3">
+              <i class="fa-solid fa-location-dot text-slate-400 mr-1.5 shrink-0"></i>
+              <span class="truncate">${rep.address || rep.wardNumber || "Nagpur"}</span>
             </div>
 
-            <!-- Severity meter -->
-            <div class="bg-slate-50 rounded-lg p-2 border border-slate-100 mb-2">
-              <div class="flex justify-between items-center text-[11px] font-semibold mb-1">
-                <span class="text-slate-600"><i class="fa-solid fa-brain text-purple-600 mr-1"></i> AI Hazard Rating</span>
-                <span class="text-slate-900 font-bold">${rep.severityScore ? rep.severityScore.toFixed(1) : "5.0"}/10</span>
+            <!-- AI Severity Bar -->
+            <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-100 mb-1">
+              <div class="flex justify-between items-center text-[10px] font-bold mb-1">
+                <span class="text-slate-500">Hazard Rating</span>
+                <span class="text-slate-800 font-bold">${rep.severityScore ? rep.severityScore.toFixed(1) : "5.0"} / 10</span>
               </div>
               <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
                 <div class="h-full rounded-full ${
@@ -275,20 +244,20 @@ function renderFeed(reports) {
         </div>
 
         <!-- Footer -->
-        <div class="px-4 py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+        <div class="px-4 py-2.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between">
           <button onclick="CivicApp.toggleUpvote('${rep._id || rep.id}')" 
-                  class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                     isUpvoted
                       ? "bg-blue-600 text-white shadow-sm"
                       : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
                   }">
             <i class="fa-solid fa-thumbs-up ${isUpvoted ? "text-white" : "text-blue-600"}"></i>
-            <span>${rep.upvotes || 1} Support</span>
+            <span>${rep.upvotes || 1}</span>
           </button>
 
           <button onclick="CivicApp.openDetailModal('${rep._id || rep.id}')" 
-                  class="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1">
-            Track Ticket <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                  class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+            View Details <i class="fa-solid fa-arrow-right text-[10px]"></i>
           </button>
         </div>
       </div>
@@ -310,7 +279,7 @@ async function toggleUpvote(reportId) {
   }
 }
 
-// Report Wizard
+// Report Form Listeners
 function setupReportWizardListeners() {
   const fileInput = document.getElementById("wizardPhotoInput");
   if (fileInput) fileInput.addEventListener("change", handleWizardImageScan);
@@ -344,9 +313,9 @@ async function handleWizardImageScan(e) {
   if (scanBox) {
     scanBox.classList.remove("hidden");
     scanBox.innerHTML = `
-      <div class="flex items-center gap-2 text-blue-700 font-semibold text-xs py-2">
+      <div class="flex items-center gap-2 text-blue-600 font-semibold text-xs py-2 bg-blue-50 border border-blue-100 rounded-xl px-3">
         <i class="fa-solid fa-circle-notch fa-spin"></i>
-        <span>AI Vision Engine is analyzing hazard classification & severity...</span>
+        <span>AI is scanning image for category & hazard severity...</span>
       </div>
     `;
   }
@@ -367,20 +336,20 @@ async function handleWizardImageScan(e) {
     if (catSelect && ai.detectedCategory) catSelect.value = ai.detectedCategory;
 
     scanBox.innerHTML = `
-      <div class="bg-blue-50 border border-blue-200 rounded-xl p-3">
+      <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-3 text-xs">
         <div class="flex items-center justify-between mb-1">
-          <span class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
-            <i class="fa-solid fa-shield-check text-blue-600"></i> AI Vision Verified (${(ai.confidence * 100).toFixed(0)}% Match)
+          <span class="font-bold text-blue-900 flex items-center gap-1.5">
+            <i class="fa-solid fa-sparkles text-blue-600"></i> AI Scan Result (${(ai.confidence * 100).toFixed(0)}% Confidence)
           </span>
-          <span class="text-[11px] font-bold px-2 py-0.5 rounded ${
+          <span class="font-bold px-2 py-0.5 rounded-full text-[10px] ${
             ai.urgencyLevel === "CRITICAL" ? "bg-red-600 text-white" : "bg-blue-700 text-white"
           }">
-            ${ai.urgencyLevel} Urgency
+            ${ai.urgencyLevel} Priority
           </span>
         </div>
-        <p class="text-xs text-slate-700 mb-1.5 font-medium">${ai.descriptionSummary}</p>
-        <div class="flex flex-wrap gap-2 text-[10px] font-semibold text-slate-700">
-          <span class="bg-white px-2 py-0.5 rounded border border-blue-100">🏛️ ${ai.recommendedDepartment}</span>
+        <p class="text-slate-700 mb-1.5 font-medium">${ai.descriptionSummary}</p>
+        <div class="flex flex-wrap gap-2 text-[10px] font-semibold text-slate-600">
+          <span class="bg-white px-2 py-0.5 rounded border border-blue-100">🏛️ Dept: ${ai.recommendedDepartment}</span>
           <span class="bg-white px-2 py-0.5 rounded border border-blue-100">⏱️ SLA: ${ai.estimatedSlaHours}h</span>
           ${
             ai.potentialDuplicateDetected
@@ -392,8 +361,8 @@ async function handleWizardImageScan(e) {
     `;
   } catch (err) {
     scanBox.innerHTML = `
-      <div class="text-xs text-slate-600 flex items-center gap-1.5 py-1 font-medium">
-        <i class="fa-solid fa-check text-emerald-600"></i> Photo attached. Ready for submission.
+      <div class="text-xs text-slate-600 flex items-center gap-1.5 py-1">
+        <i class="fa-solid fa-check text-emerald-600"></i> Photo attached. Ready to submit.
       </div>
     `;
   }
@@ -406,7 +375,7 @@ function handleVoiceRecording() {
   const btn = document.getElementById("wizardVoiceBtn");
 
   if (!SpeechRecognition) {
-    alert("Speech recognition is not supported on this browser. Please type your notes.");
+    alert("Speech recognition is not supported on this browser.");
     return;
   }
 
@@ -423,11 +392,11 @@ function handleVoiceRecording() {
   rec.start();
 
   function resetBtn() {
-    btn.innerHTML = `<i class="fa-solid fa-microphone text-blue-600"></i> Speak Notes`;
+    btn.innerHTML = `<i class="fa-solid fa-microphone"></i> Speak Notes`;
   }
 }
 
-// Get GPS
+// GPS Location
 function handleGetCurrentGPS() {
   const btn = document.getElementById("wizardGpsBtn");
   if (navigator.geolocation) {
@@ -438,7 +407,7 @@ function handleGetCurrentGPS() {
         if (window.reportPickerMap) {
           window.reportPickerMap.setView([pos.coords.latitude, pos.coords.longitude], 15);
         }
-        btn.innerHTML = `<i class="fa-solid fa-check"></i> GPS Pinned`;
+        btn.innerHTML = `<i class="fa-solid fa-check"></i> Pinned!`;
         setTimeout(() => { btn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Use GPS`; }, 2000);
       },
       () => { btn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Use GPS`; }
@@ -451,7 +420,7 @@ async function handleReportSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById("wizardSubmitBtn");
   btn.disabled = true;
-  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting to Municipal Desk...`;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
 
   try {
     const formData = new FormData(e.target);
@@ -467,7 +436,7 @@ async function handleReportSubmit(e) {
     alert("Submission error: " + err.message);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<i class="fa-solid fa-paper-plane mr-2"></i> Register Official Complaint`;
+    btn.innerHTML = `<i class="fa-solid fa-paper-plane mr-2"></i> Submit Grievance (+50 Karma)`;
   }
 }
 
@@ -479,55 +448,42 @@ function showAcknowledgementSlip(rep) {
 
   box.innerHTML = `
     <div id="printableReceipt" class="p-6 font-sans">
-      <div class="text-center border-b-2 border-slate-900 pb-4 mb-4">
-        <h2 class="text-lg font-extrabold uppercase tracking-wide text-slate-900">Nagpur Municipal Corporation (NMC)</h2>
-        <p class="text-xs text-slate-500 font-semibold">Citizen Grievance Redressal & Smart City Operations</p>
-        <span class="inline-block mt-2 px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">
-          ✓ Complaint Registered Successfully
-        </span>
+      <div class="text-center border-b border-slate-200 pb-4 mb-4">
+        <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-lg mb-2">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <h3 class="text-base font-bold text-slate-900">Complaint Registered Successfully</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Municipal Grievance Redressal Token</p>
       </div>
 
-      <div class="grid grid-cols-2 gap-3 text-xs mb-4">
+      <div class="grid grid-cols-2 gap-3 text-xs mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
         <div>
-          <span class="text-slate-500 font-semibold">Grievance Ticket ID:</span>
-          <p class="font-mono-code font-bold text-sm text-blue-700">${rep.ticketId}</p>
+          <span class="text-slate-500">Ticket ID:</span>
+          <p class="font-mono font-bold text-sm text-blue-600">${rep.ticketId}</p>
         </div>
         <div>
-          <span class="text-slate-500 font-semibold">Date & Time:</span>
-          <p class="font-bold text-slate-800">${new Date(rep.createdAt).toLocaleString()}</p>
+          <span class="text-slate-500">Date:</span>
+          <p class="font-bold text-slate-800">${new Date(rep.createdAt).toLocaleDateString()}</p>
         </div>
         <div>
-          <span class="text-slate-500 font-semibold">Citizen Name:</span>
-          <p class="font-bold text-slate-800">${rep.reporterName || "Civic Citizen"}</p>
-        </div>
-        <div>
-          <span class="text-slate-500 font-semibold">Ward & Zone:</span>
+          <span class="text-slate-500">Ward:</span>
           <p class="font-bold text-slate-800">${rep.wardNumber || "Ward 12 - Dharampeth"}</p>
         </div>
+        <div>
+          <span class="text-slate-500">Department:</span>
+          <p class="font-bold text-slate-800">${rep.assignedDepartment}</p>
+        </div>
         <div class="col-span-2">
-          <span class="text-slate-500 font-semibold">Hazard Summary:</span>
+          <span class="text-slate-500">Issue Summary:</span>
           <p class="font-bold text-slate-800">${rep.title}</p>
         </div>
-        <div>
-          <span class="text-slate-500 font-semibold">Assigned Department:</span>
-          <p class="font-bold text-blue-700">${rep.assignedDepartment}</p>
-        </div>
-        <div>
-          <span class="text-slate-500 font-semibold">Guaranteed SLA:</span>
-          <p class="font-bold text-purple-700">${rep.estimatedSlaHours || 48} Hours</p>
-        </div>
       </div>
 
-      <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-[11px] text-slate-600 mb-6">
-        <p class="font-semibold mb-1">📢 Tracking & SMS Updates:</p>
-        <p>You can track resolution progress at any time using your Ticket ID on this portal or via WhatsApp Municipal Bot.</p>
-      </div>
-
-      <div class="flex gap-3">
-        <button onclick="window.print()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2">
-          <i class="fa-solid fa-print"></i> Print Receipt / PDF
+      <div class="flex gap-2">
+        <button onclick="window.print()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition">
+          <i class="fa-solid fa-print"></i> Print Slip
         </button>
-        <button onclick="document.getElementById('receiptModal').classList.add('hidden'); CivicApp.switchTab('feed');" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs">
+        <button onclick="document.getElementById('receiptModal').classList.add('hidden'); CivicApp.switchTab('feed');" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition">
           View on City Map
         </button>
       </div>
@@ -537,7 +493,7 @@ function showAcknowledgementSlip(rep) {
   modal.classList.remove("hidden");
 }
 
-// Track Ticket by ID (Direct Lookup)
+// Track Ticket by ID
 async function trackTicketDirectly(ticketId) {
   try {
     switchTab("track-ticket");
@@ -549,7 +505,7 @@ async function trackTicketDirectly(ticketId) {
       resBox.innerHTML = `
         <div class="text-center py-8">
           <i class="fa-solid fa-circle-notch fa-spin text-blue-600 text-2xl mb-2"></i>
-          <p class="text-xs text-slate-500 font-semibold">Searching municipal registry for ticket ${ticketId}...</p>
+          <p class="text-xs text-slate-500 font-medium">Searching for ticket ${ticketId}...</p>
         </div>
       `;
     }
@@ -563,7 +519,7 @@ async function trackTicketDirectly(ticketId) {
         <div class="bg-red-50 border border-red-200 rounded-2xl p-6 text-center text-red-700 text-xs">
           <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-red-500"></i>
           <h4 class="font-bold text-sm">Ticket Not Found</h4>
-          <p class="mt-1">No municipal complaint matches reference '${ticketId}'. Please verify the ticket code.</p>
+          <p class="mt-1">No ticket matches reference '${ticketId}'. Please verify the ticket code.</p>
         </div>
       `;
     }
@@ -577,44 +533,41 @@ function renderTrackResult(rep) {
   const isResolved = rep.status === "RESOLVED";
 
   box.innerHTML = `
-    <div class="gov-card p-6 border border-slate-200">
+    <div class="clean-card p-6 border border-slate-200">
       
-      <!-- Top Ticket Header -->
       <div class="flex flex-wrap items-center justify-between border-b border-slate-100 pb-4 mb-4 gap-2">
         <div>
-          <span class="text-xs font-mono-code font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md">${rep.ticketId}</span>
+          <span class="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded">${rep.ticketId}</span>
           <h3 class="text-base font-bold text-slate-900 mt-1">${rep.title}</h3>
-          <p class="text-xs text-slate-500">📍 ${rep.address || "Ward 12, Nagpur"}</p>
+          <p class="text-xs text-slate-500">📍 ${rep.address || "Nagpur"}</p>
         </div>
         <div class="text-right">
           <span class="px-3 py-1 rounded-full text-xs font-bold ${
-            isResolved ? "bg-emerald-600 text-white" : "bg-blue-600 text-white"
+            isResolved ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-blue-50 text-blue-700 border border-blue-200"
           }">
             ${rep.status.replace("_", " ")}
           </span>
-          <p class="text-[11px] text-slate-400 mt-1">SLA Limit: ${rep.estimatedSlaHours || 48}h</p>
+          <p class="text-[11px] text-slate-400 mt-1">SLA Target: ${rep.estimatedSlaHours || 48}h</p>
         </div>
       </div>
 
-      <!-- Officer & Department Card -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-6 text-xs">
         <div>
-          <span class="text-slate-500 font-medium">Assigned Department:</span>
-          <p class="font-bold text-slate-900">${rep.assignedDepartment}</p>
+          <span class="text-slate-500">Department:</span>
+          <p class="font-bold text-slate-800">${rep.assignedDepartment}</p>
         </div>
         <div>
-          <span class="text-slate-500 font-medium">Nodal Officer:</span>
-          <p class="font-bold text-slate-900">${rep.assignedOfficer || "Duty Officer"}</p>
+          <span class="text-slate-500">Nodal Officer:</span>
+          <p class="font-bold text-slate-800">${rep.assignedOfficer || "Desk Officer"}</p>
         </div>
         <div>
-          <span class="text-slate-500 font-medium">Officer Contact:</span>
-          <p class="font-bold text-blue-700">${rep.officerContact || "+91 712-2561234"}</p>
+          <span class="text-slate-500">Officer Phone:</span>
+          <p class="font-bold text-blue-600">${rep.officerContact || "+91 712-2561234"}</p>
         </div>
       </div>
 
-      <!-- Milestones Timeline -->
-      <h4 class="text-xs font-bold text-slate-800 mb-3 uppercase tracking-wider flex items-center gap-1.5">
-        <i class="fa-solid fa-list-check text-blue-600"></i> Milestone Redressal Timeline
+      <h4 class="text-xs font-bold text-slate-800 mb-3 uppercase tracking-wider">
+        Redressal Milestones
       </h4>
 
       <div class="relative pl-6 space-y-4 mb-6">
@@ -623,17 +576,17 @@ function renderTrackResult(rep) {
           .map(
             (ev, i) => `
           <div class="relative flex items-start gap-3 text-xs">
-            <div class="w-7 h-7 rounded-full bg-blue-700 text-white flex items-center justify-center font-bold text-[11px] shrink-0 z-10">
+            <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0 z-10">
               ${i + 1}
             </div>
             <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-sm w-full">
-              <div class="flex justify-between items-center mb-1">
+              <div class="flex justify-between items-center mb-0.5">
                 <span class="font-bold text-slate-800">${ev.title}</span>
-                <span class="text-[10px] text-slate-400">${new Date(ev.createdAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                <span class="text-[10px] text-slate-400">${new Date(ev.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
-              <p class="text-slate-600 mb-1">${ev.description || "Updated."}</p>
-              <span class="text-[10px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">
-                ${ev.actorName} (${ev.actorRole})
+              <p class="text-slate-600 text-[11px] mb-1">${ev.description || "Updated."}</p>
+              <span class="text-[9px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                ${ev.actorName}
               </span>
             </div>
           </div>
@@ -642,11 +595,9 @@ function renderTrackResult(rep) {
           .join("")}
       </div>
 
-      <div class="flex gap-3">
-        <button onclick="CivicApp.openDetailModal('${rep._id || rep.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 rounded-xl">
-          Open Full Interactive Modal & Comments
-        </button>
-      </div>
+      <button onclick="CivicApp.openDetailModal('${rep._id || rep.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 rounded-xl transition">
+        Open Interactive Details & Discussion
+      </button>
 
     </div>
   `;
@@ -662,8 +613,8 @@ async function openDetailModal(reportId) {
     modal.classList.remove("hidden");
     container.innerHTML = `
       <div class="p-12 text-center">
-        <i class="fa-solid fa-circle-notch fa-spin text-blue-600 text-3xl mb-3"></i>
-        <p class="text-slate-500 font-semibold text-xs">Loading grievance file...</p>
+        <i class="fa-solid fa-circle-notch fa-spin text-blue-600 text-2xl mb-2"></i>
+        <p class="text-slate-500 font-medium text-xs">Loading report details...</p>
       </div>
     `;
 
@@ -671,7 +622,7 @@ async function openDetailModal(reportId) {
     currentActiveReport = rep;
     renderDetailModalContent(rep);
   } catch (err) {
-    console.error("Open detail modal error:", err);
+    console.error("Open detail error:", err);
   }
 }
 
@@ -684,13 +635,12 @@ function renderDetailModalContent(rep) {
   container.innerHTML = `
     <div class="p-6">
       
-      <!-- Top Bar -->
       <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
         <div>
           <div class="flex items-center gap-2 mb-1">
-            <span class="text-xs font-mono-code font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded">${rep.ticketId}</span>
+            <span class="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded">${rep.ticketId}</span>
             <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${
-              isResolved ? "bg-emerald-600 text-white" : "bg-blue-600 text-white"
+              isResolved ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-blue-50 text-blue-700 border border-blue-200"
             }">
               ${rep.status.replace("_", " ")}
             </span>
@@ -704,28 +654,25 @@ function renderDetailModalContent(rep) {
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        <!-- Left Column: Photos & Details -->
         <div>
-          
-          <!-- Before / After Photo View -->
           ${
             rep.resolutionImageUrl
               ? `
-              <div class="mb-4 bg-emerald-50 border border-emerald-200 rounded-2xl p-3">
+              <div class="mb-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl p-3">
                 <span class="text-xs font-bold text-emerald-800 flex items-center gap-1.5 mb-2">
                   <i class="fa-solid fa-circle-check text-emerald-600"></i> AI Verified Before vs After Repair
                 </span>
                 <div class="grid grid-cols-2 gap-2 mb-2">
                   <div>
-                    <span class="text-[10px] font-bold text-slate-500 uppercase">Original Damage</span>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">Reported</span>
                     <img src="${rep.imageUrl}" class="w-full h-28 object-cover rounded-lg border border-slate-200 mt-1"/>
                   </div>
                   <div>
-                    <span class="text-[10px] font-bold text-emerald-700 uppercase">Repaired Surface</span>
+                    <span class="text-[10px] font-bold text-emerald-700 uppercase">Fixed</span>
                     <img src="${rep.resolutionImageUrl}" class="w-full h-28 object-cover rounded-lg border border-emerald-300 mt-1"/>
                   </div>
                 </div>
-                <p class="text-xs text-emerald-900 font-medium">${rep.resolutionNotes || "Work completed and verified by municipal engineer."}</p>
+                <p class="text-xs text-emerald-900 font-medium">${rep.resolutionNotes || "Work completed."}</p>
               </div>
             `
               : `
@@ -735,54 +682,48 @@ function renderDetailModalContent(rep) {
             `
           }
 
-          <!-- Details Box -->
           <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-2 text-xs mb-4">
             <div class="flex justify-between">
-              <span class="text-slate-500 font-medium">Ward / Zone:</span>
-              <span class="font-bold text-slate-800">${rep.wardNumber || "Ward 12 - Dharampeth"} (${rep.zoneName || "Zone 2"})</span>
+              <span class="text-slate-500">Ward:</span>
+              <span class="font-bold text-slate-800">${rep.wardNumber || "Ward 12 - Dharampeth"}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-slate-500 font-medium">Department:</span>
-              <span class="font-bold text-blue-700">${rep.assignedDepartment}</span>
+              <span class="text-slate-500">Department:</span>
+              <span class="font-bold text-blue-600">${rep.assignedDepartment}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-slate-500 font-medium">Officer-in-Charge:</span>
-              <span class="font-bold text-slate-800">${rep.assignedOfficer || "Desk Officer"} (${rep.officerContact || "NMC Desk"})</span>
+              <span class="text-slate-500">Officer:</span>
+              <span class="font-bold text-slate-800">${rep.assignedOfficer || "Desk Officer"}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-slate-500 font-medium">Reported By:</span>
-              <span class="font-bold text-slate-800">${rep.reporterName || "Civic Citizen"}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-500 font-medium">Citizen Support:</span>
-              <span class="font-bold text-emerald-600">👍 ${rep.upvotes || 1} Citizen Upvotes</span>
+              <span class="text-slate-500">Community Votes:</span>
+              <span class="font-bold text-emerald-600">👍 ${rep.upvotes || 1} Votes</span>
             </div>
           </div>
 
-          <!-- Citizen Comments Section -->
+          <!-- Comments -->
           <div class="border-t border-slate-100 pt-3">
-            <h4 class="text-xs font-bold text-slate-800 mb-2 flex items-center gap-1.5">
-              <i class="fa-solid fa-comments text-blue-600"></i> Community Discussion (${(rep.comments || []).length})
+            <h4 class="text-xs font-bold text-slate-800 mb-2">
+              Community Discussion (${(rep.comments || []).length})
             </h4>
 
             <div class="space-y-2 max-h-36 overflow-y-auto mb-2 text-xs">
               ${(rep.comments && rep.comments.length > 0)
                 ? rep.comments.map((c) => `
                   <div class="bg-white p-2.5 rounded-xl border border-slate-200">
-                    <div class="flex justify-between items-center text-[10px] text-slate-400 mb-1">
+                    <div class="flex justify-between items-center text-[10px] text-slate-400 mb-0.5">
                       <span class="font-bold text-slate-700">${c.userName}</span>
                       <span>${new Date(c.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                     <p class="text-slate-600">${c.text}</p>
                   </div>
                 `).join("")
-                : `<p class="text-slate-400 text-xs italic">No comments yet. Be the first to share an update.</p>`
+                : `<p class="text-slate-400 text-xs italic">No comments yet.</p>`
               }
             </div>
 
-            <!-- Add Comment Form -->
             <div class="flex gap-2">
-              <input id="newCommentInput" type="text" placeholder="Add update or comment..." class="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <input id="newCommentInput" type="text" placeholder="Add update or note..." class="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" />
               <button onclick="CivicApp.postComment('${rep._id || rep.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">
                 Post
               </button>
@@ -791,10 +732,10 @@ function renderDetailModalContent(rep) {
 
         </div>
 
-        <!-- Right Column: Timeline & Actions -->
+        <!-- Right Column -->
         <div>
-          <h4 class="text-xs font-bold text-slate-800 mb-3 uppercase tracking-wider flex items-center gap-1.5">
-            <i class="fa-solid fa-route text-blue-600"></i> Redressal Milestones
+          <h4 class="text-xs font-bold text-slate-800 mb-3 uppercase tracking-wider">
+            Resolution Milestones
           </h4>
 
           <div class="relative pl-6 space-y-4 mb-6">
@@ -802,7 +743,7 @@ function renderDetailModalContent(rep) {
             ${(rep.timelineEvents || [])
               .map((ev, i) => `
                 <div class="relative flex items-start gap-3 text-xs">
-                  <div class="w-6 h-6 rounded-full bg-blue-700 text-white flex items-center justify-center font-bold text-[10px] shrink-0 z-10">
+                  <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0 z-10">
                     ${i + 1}
                   </div>
                   <div class="bg-white border border-slate-200 rounded-xl p-2.5 shadow-sm w-full">
@@ -810,8 +751,8 @@ function renderDetailModalContent(rep) {
                       <span class="font-bold text-slate-800">${ev.title}</span>
                       <span class="text-[10px] text-slate-400">${new Date(ev.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
-                    <p class="text-slate-600 text-[11px] mb-1">${ev.description || "Status updated."}</p>
-                    <span class="text-[9px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
+                    <p class="text-slate-600 text-[11px] mb-1">${ev.description || "Updated."}</p>
+                    <span class="text-[9px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
                       ${ev.actorName}
                     </span>
                   </div>
@@ -819,13 +760,12 @@ function renderDetailModalContent(rep) {
               `).join("")}
           </div>
 
-          <!-- Bottom Action Buttons -->
           <div class="space-y-2 border-t border-slate-100 pt-3">
             <button onclick="CivicApp.toggleUpvote('${rep._id || rep.id}')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-2">
-              <i class="fa-solid fa-thumbs-up text-blue-600"></i> Support Issue (+10 Karma)
+              <i class="fa-solid fa-thumbs-up text-blue-600"></i> Upvote Issue (+10 Karma)
             </button>
             <button onclick="CivicApp.showAcknowledgementSlip(currentActiveReport)" class="w-full bg-slate-900 hover:bg-black text-white font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-2">
-              <i class="fa-solid fa-file-pdf"></i> Download Official Acknowledgement
+              <i class="fa-solid fa-file-pdf"></i> Download Acknowledgement Slip
             </button>
           </div>
 
@@ -846,7 +786,7 @@ async function postComment(reportId) {
   try {
     const updated = await window.CivicAPI.addComment(reportId, {
       text,
-      userName: "Civic Citizen (You)",
+      userName: "Civic Citizen",
       userRole: "CITIZEN",
     });
     currentActiveReport = updated;
@@ -856,22 +796,26 @@ async function postComment(reportId) {
   }
 }
 
-// Admin Dashboard
-async function loadAdminDashboard() {
+// Analytics and Admin Dashboard loader
+async function loadAnalyticsAndAdmin() {
   try {
     const stats = await window.CivicAPI.getAdminStats();
 
-    document.getElementById("statTotal").innerText = stats.totalReports;
-    document.getElementById("statCritical").innerText = stats.highUrgencyCount;
-    document.getElementById("statInProgress").innerText = stats.inProgressReports;
-    document.getElementById("statResolved").innerText = stats.resolvedReports;
-    document.getElementById("statAvgSLA").innerText = `${stats.averageResolutionHours}h`;
+    const statTotal = document.getElementById("statTotal");
+    const statCritical = document.getElementById("statCritical");
+    const statInProgress = document.getElementById("statInProgress");
+    const statResolved = document.getElementById("statResolved");
+
+    if (statTotal) statTotal.innerText = stats.totalReports;
+    if (statCritical) statCritical.innerText = stats.highUrgencyCount;
+    if (statInProgress) statInProgress.innerText = stats.inProgressReports;
+    if (statResolved) statResolved.innerText = stats.resolvedReports;
 
     renderCategoryChart(stats.categoryDistribution);
     renderDepartmentTable(stats.departmentWorkload);
     renderAdminDispatchTable();
   } catch (err) {
-    console.error("Admin dashboard error:", err);
+    console.error("Analytics load error:", err);
   }
 }
 
@@ -891,7 +835,7 @@ function renderCategoryChart(catDist) {
       datasets: [
         {
           data: data,
-          backgroundColor: ["#1e3a8a", "#059669", "#d97706", "#0284c7", "#dc2626", "#7c3aed"],
+          backgroundColor: ["#2563eb", "#10b981", "#f59e0b", "#06b6d4", "#ef4444", "#8b5cf6"],
           borderWidth: 2,
           borderColor: "#ffffff",
         },
@@ -918,10 +862,10 @@ function renderDepartmentTable(workload) {
       <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
         <div class="flex justify-between items-center mb-1 text-xs">
           <span class="font-bold text-slate-800">${dept}</span>
-          <span class="font-bold text-blue-700">${data.resolved}/${data.total} Closed (${percentage}%)</span>
+          <span class="font-bold text-blue-600">${data.resolved}/${data.total} Fixed (${percentage}%)</span>
         </div>
         <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-          <div class="bg-emerald-600 h-full rounded-full" style="width: ${percentage}%"></div>
+          <div class="bg-emerald-500 h-full rounded-full" style="width: ${percentage}%"></div>
         </div>
       </div>
     `;
@@ -938,7 +882,7 @@ async function renderAdminDispatchTable() {
     .map(
       (r) => `
     <tr class="border-b border-slate-100 hover:bg-slate-50 text-xs">
-      <td class="py-3 px-4 font-mono-code font-bold text-blue-700">${r.ticketId}</td>
+      <td class="py-3 px-4 font-mono font-bold text-blue-600">${r.ticketId}</td>
       <td class="py-3 px-4 font-semibold text-slate-900 max-w-[190px] truncate">${r.title}</td>
       <td class="py-3 px-4 text-slate-600">${r.wardNumber || "Ward 12"}</td>
       <td class="py-3 px-4">
@@ -959,7 +903,7 @@ async function renderAdminDispatchTable() {
       </td>
       <td class="py-3 px-4 text-slate-600">${r.assignedDepartment}</td>
       <td class="py-3 px-4">
-        <button onclick="CivicApp.openDetailModal('${r._id || r.id}')" class="text-blue-700 hover:text-blue-900 font-bold">
+        <button onclick="CivicApp.openDetailModal('${r._id || r.id}')" class="text-blue-600 hover:text-blue-800 font-bold">
           Inspect
         </button>
       </td>
@@ -976,20 +920,19 @@ async function changeReportStatus(reportId, newStatus) {
       actorName: "Municipal Admin",
       actorRole: "ADMIN",
     });
-    loadAdminDashboard();
+    loadAnalyticsAndAdmin();
     loadReports();
   } catch (err) {
     alert("Failed to update status: " + err.message);
   }
 }
 
-// Reset seed demo data
 async function resetDemoData() {
-  if (confirm("Reset all municipal reports to clean seed demo data?")) {
+  if (confirm("Reset all reports to clean seed demo data?")) {
     await window.CivicAPI.resetSeedData();
     alert("Demo data reset successfully!");
     loadReports();
-    if (currentTab === "admin") loadAdminDashboard();
+    if (currentTab === "admin" || currentTab === "analytics") loadAnalyticsAndAdmin();
   }
 }
 
