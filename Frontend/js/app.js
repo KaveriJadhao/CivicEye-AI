@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupReportWizardListeners();
   initHomeComparisonSlider();
   loadReports();
+  switchTab("overview");
 });
 
 // Toast notification helper
@@ -859,7 +860,7 @@ function renderDetailModalContent(rep) {
   setTimeout(() => initComparisonSlider(), 50);
 }
 
-// Comparison Slider helper
+// Modal Comparison Slider
 function initComparisonSlider() {
   const container = document.getElementById("sliderBox");
   const afterImg = document.getElementById("afterImgLayer");
@@ -874,36 +875,7 @@ function initComparisonSlider() {
     let x = clientX - rect.left;
     x = Math.max(0, Math.min(x, rect.width));
     const percentage = (x / rect.width) * 100;
-    afterImg.style.width = percentage + "%";
-    handle.style.left = percentage + "%";
-  };
-  const start = (e) => { isDragging = true; move(e); };
-  const stop = () => { isDragging = false; };
-
-  container.addEventListener("mousedown", start);
-  window.addEventListener("mousemove", move);
-  window.addEventListener("mouseup", stop);
-  container.addEventListener("touchstart", start);
-  window.addEventListener("touchmove", move);
-  window.addEventListener("touchend", stop);
-}
-
-// Home Comparison Slider
-function initHomeComparisonSlider() {
-  const container = document.getElementById("homeSliderBox");
-  const afterImg = document.getElementById("homeAfterImgLayer");
-  const handle = document.getElementById("homeSliderHandle");
-  if (!container || !afterImg || !handle) return;
-
-  let isDragging = false;
-  const move = (e) => {
-    if (!isDragging) return;
-    const rect = container.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    let x = clientX - rect.left;
-    x = Math.max(0, Math.min(x, rect.width));
-    const percentage = (x / rect.width) * 100;
-    afterImg.style.width = percentage + "%";
+    afterImg.style.clipPath = `polygon(0 0, ${percentage}% 0, ${percentage}% 100%, 0 100%)`;
     handle.style.left = percentage + "%";
   };
   const start = (e) => { isDragging = true; move(e); };
