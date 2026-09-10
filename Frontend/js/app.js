@@ -90,32 +90,113 @@ function addKarma(amount, reason = "Civic Action") {
   }
 }
 
-// Navigation between simple sections
-function switchTab(tab) {
-  currentTab = tab;
+// Comparison Slider
+function initHomeComparisonSlider() {
+  const container = document.getElementById("homeSliderBox");
+  const handle = document.getElementById("homeSliderHandle");
+  const afterImg = document.getElementById("homeAfterImgLayer");
+  if (!container || !handle || !afterImg) return;
 
-  // Hide all sections
-  document.querySelectorAll(".page-section").forEach((sec) => sec.classList.add("hidden"));
+  let isDragging = false;
 
-  // Show selected section
-  const activeSec = document.getElementById(`section_${tab}`);
-  if (activeSec) activeSec.classList.remove("hidden");
+  const updateSlider = (x) => {
+    const rect = container.getBoundingClientRect();
+    let posX = x - rect.left;
+    if (posX < 0) posX = 0;
+    if (posX > rect.width) posX = rect.width;
+    const percentage = (posX / rect.width) * 100;
+    handle.style.left = `${percentage}%`;
+    afterImg.style.clipPath = `polygon(0 0, ${percentage}% 0, ${percentage}% 100%, 0 100%)`;
+  };
 
-  // Scroll to top
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  handle.addEventListener("mousedown", () => (isDragging = true));
+  window.addEventListener("mouseup", () => (isDragging = false));
+  window.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    updateSlider(e.clientX);
+  });
 
-  if (tab === "feed") {
+  handle.addEventListener("touchstart", () => (isDragging = true));
+  window.addEventListener("touchend", () => (isDragging = false));
+  window.addEventListener("touchmove", (e) => {
+    if (!isDragging) return;
+    updateSlider(e.touches[0].clientX);
+  });
+}
+
+// FAQ Accordion Toggle
+function toggleFaq(button) {
+  const faqItem = button.closest(".faq-item");
+  if (!faqItem) return;
+  const answer = faqItem.querySelector(".faq-answer");
+  const icon = button.querySelector(".faq-icon");
+  const isOpen = answer && !answer.classList.contains("hidden");
+
+  // Close all FAQs
+  document.querySelectorAll(".faq-item .faq-answer").forEach((el) => el.classList.add("hidden"));
+  document.querySelectorAll(".faq-item .faq-icon").forEach((el) => el.classList.remove("rotate-180"));
+
+  // Toggle clicked
+  if (answer && !isOpen) {
+    answer.classList.remove("hidden");
+    if (icon) icon.classList.add("rotate-180");
+  }
+}
+
+// Cockpit Tab Switcher
+function switchCockpitTab(tabName) {
+  // Update Tab Buttons
+  document.querySelectorAll(".cockpit-tab-btn").forEach((btn) => {
+    btn.classList.remove("bg-blue-600", "text-white", "shadow-sm");
+    btn.classList.add("text-slate-600", "hover:bg-slate-100");
+  });
+
+  const activeBtn = document.getElementById(`cockpitTabBtn_${tabName}`);
+  if (activeBtn) {
+    activeBtn.classList.remove("text-slate-600", "hover:bg-slate-100");
+    activeBtn.classList.add("bg-blue-600", "text-white", "shadow-sm");
+  }
+
+  // Update Tab Panels
+  document.querySelectorAll(".cockpit-panel").forEach((p) => p.classList.add("hidden"));
+  const activePanel = document.getElementById(`cockpitPanel_${tabName}`);
+  if (activePanel) {
+    activePanel.classList.remove("hidden");
+  }
+
+  if (tabName === "feed") {
     loadReports();
-    setTimeout(() => window.CivicMap.initMainMap(), 150);
-  } else if (tab === "report") {
-    setTimeout(() => window.CivicMap.initReportPickerMap(), 150);
-  } else if (tab === "officer") {
+    setTimeout(() => {
+      if (window.CivicMap && window.CivicMap.initMainMap) {
+        window.CivicMap.initMainMap();
+      }
+    }, 150);
+  } else if (tabName === "report") {
+    setTimeout(() => {
+      if (window.CivicMap && window.CivicMap.initReportPickerMap) {
+        window.CivicMap.initReportPickerMap();
+      }
+    }, 150);
+  } else if (tabName === "officer") {
     renderAdminDispatchTable();
   }
 }
 
+function scrollToCockpit(tabName = "report") {
+  switchCockpitTab(tabName);
+  const cockpit = document.getElementById("app-cockpit");
+  if (cockpit) {
+    cockpit.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+// Legacy / Direct Switch helper
+function switchTab(tab) {
+  scrollToCockpit(tab === "home" ? "feed" : tab);
+}
+
 function quickReportCategory(catName) {
-  switchTab("report");
+  scrollToCockpit("report");
   const catSelect = document.getElementById("wizardCategory");
   if (catSelect) catSelect.value = catName;
 }
@@ -957,6 +1038,9 @@ function getTimeAgo(date) {
 
 window.CivicApp = {
   switchTab,
+  switchCockpitTab,
+  scrollToCockpit,
+  toggleFaq,
   toggleUpvote,
   openDetailModal,
   changeReportStatus,
