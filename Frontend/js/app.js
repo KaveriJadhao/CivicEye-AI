@@ -1,4 +1,4 @@
-// CivicEye - Clean, Intuitive Frontend Application Controller
+// CivicEye - Advanced Frontend Controller with Before/After Slider, Toasts & Micro-Interactions
 let currentReports = [];
 let currentFilter = {
   category: "All",
@@ -19,26 +19,78 @@ let currentActiveReport = null;
 
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
   updateKarmaDisplay();
   setupNavListeners();
   setupFilterListeners();
   setupReportWizardListeners();
+  setupKeyboardShortcuts();
   window.CivicMap.initMainMap();
   loadReports();
 });
+
+// Toast notification helper
+function showToast(message, icon = "fa-circle-check", type = "info") {
+  const container = document.getElementById("toastContainer");
+  if (!container) return;
+
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `
+    <i class="fa-solid ${icon} text-blue-400"></i>
+    <span>${message}</span>
+  `;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(10px)";
+    toast.style.transition = "all 0.3s ease";
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// Dark / Light Theme
+function initTheme() {
+  const isDark = localStorage.getItem("civicTheme") === "dark";
+  if (isDark) {
+    document.documentElement.classList.add("dark");
+  }
+}
+
+function toggleTheme() {
+  const isDark = document.documentElement.classList.toggle("dark");
+  localStorage.setItem("civicTheme", isDark ? "dark" : "light");
+  showToast(isDark ? "🌙 Dark mode enabled" : "☀️ Light mode enabled", "fa-circle-half-stroke");
+}
 
 function updateKarmaDisplay() {
   const el = document.getElementById("userKarmaBadge");
   if (el) el.innerText = `${userKarma} Karma`;
 }
 
-function addKarma(amount) {
+function addKarma(amount, reason = "Civic Action") {
   userKarma += amount;
   localStorage.setItem("civicKarma", userKarma.toString());
   updateKarmaDisplay();
+  showToast(`🎉 +${amount} Karma! (${reason})`, "fa-medal");
   if (window.confetti) {
-    window.confetti({ particleCount: 45, spread: 65, origin: { y: 0.8 } });
+    window.confetti({ particleCount: 50, spread: 65, origin: { y: 0.8 } });
   }
+}
+
+// Keyboard shortcuts (e.g. '/' to focus search)
+function setupKeyboardShortcuts() {
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+      e.preventDefault();
+      const search = document.getElementById("searchInput");
+      if (search) {
+        CivicApp.switchTab("feed");
+        search.focus();
+      }
+    }
+  });
 }
 
 // Navigation
@@ -63,20 +115,16 @@ function setupNavListeners() {
 function switchTab(tab) {
   currentTab = tab;
 
-  // Update Nav links styling
   const navBtns = document.querySelectorAll(".nav-tab-btn");
   navBtns.forEach((b) => {
     if (b.getAttribute("data-tab") === tab) {
-      b.className = "nav-tab-btn px-3.5 py-1.5 rounded-lg bg-white text-blue-700 shadow-sm font-bold transition";
+      b.className = "nav-tab-btn px-3.5 py-1.5 rounded-lg bg-white text-blue-700 shadow-sm font-bold transition flex items-center gap-1.5";
     } else {
-      b.className = "nav-tab-btn px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition";
+      b.className = "nav-tab-btn px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5";
     }
   });
 
-  // Hide all sections
   document.querySelectorAll(".tab-section").forEach((sec) => sec.classList.add("hidden"));
-
-  // Show active tab
   const activeSec = document.getElementById(`tabSection_${tab}`);
   if (activeSec) activeSec.classList.remove("hidden");
 
@@ -95,7 +143,7 @@ function setupFilterListeners() {
   const chips = document.querySelectorAll(".category-chip");
   chips.forEach((chip) => {
     chip.addEventListener("click", () => {
-      chips.forEach((c) => c.className = "category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shrink-0 transition");
+      chips.forEach((c) => (c.className = "category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shrink-0 transition"));
       chip.className = "category-chip chip-active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white border border-transparent shrink-0 shadow-sm transition";
       currentFilter.category = chip.getAttribute("data-category") || "All";
       loadReports();
@@ -126,7 +174,7 @@ async function loadReports() {
       feedContainer.innerHTML = `
         <div class="col-span-full text-center py-12">
           <i class="fa-solid fa-circle-notch fa-spin text-blue-600 text-2xl mb-2"></i>
-          <p class="text-slate-500 font-medium text-xs">Loading community reports...</p>
+          <p class="text-slate-500 font-medium text-xs">Loading live reports...</p>
         </div>
       `;
     }
@@ -141,7 +189,7 @@ async function loadReports() {
   }
 }
 
-// Render clean issue cards
+// Render cards
 function renderFeed(reports) {
   const container = document.getElementById("reportsFeed");
   const countBadge = document.getElementById("activeReportCount");
@@ -155,7 +203,7 @@ function renderFeed(reports) {
         <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl mb-2">
           <i class="fa-solid fa-check"></i>
         </div>
-        <h4 class="text-sm font-bold text-slate-800">No Issues Found</h4>
+        <h4 class="text-sm font-bold text-slate-800">All Clear!</h4>
         <p class="text-slate-500 text-xs mt-1">No active reports match this category or search filter.</p>
       </div>
     `;
@@ -186,10 +234,11 @@ function renderFeed(reports) {
       const timeAgo = getTimeAgo(new Date(rep.createdAt));
 
       return `
-      <div class="clean-card overflow-hidden flex flex-col justify-between">
+      <div class="clean-card card-hover overflow-hidden flex flex-col justify-between" 
+           onmouseenter="CivicMap.focusReportOnMap('${rep._id || rep.id}')">
         <div>
-          <!-- Thumbnail Image -->
-          <div class="relative h-40 w-full bg-slate-100 overflow-hidden cursor-pointer" onclick="CivicApp.openDetailModal('${rep._id || rep.id}')">
+          <!-- Thumbnail -->
+          <div class="relative h-44 w-full bg-slate-100 overflow-hidden cursor-pointer" onclick="CivicApp.openDetailModal('${rep._id || rep.id}')">
             <img src="${rep.imageUrl || 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600'}" 
                  class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
                  alt="${rep.title}"
@@ -210,8 +259,10 @@ function renderFeed(reports) {
 
           <!-- Body -->
           <div class="p-4">
-            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1 font-mono font-semibold">
-              <span>${rep.ticketId}</span>
+            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1 font-mono-code font-semibold">
+              <span class="cursor-pointer hover:text-blue-600" onclick="CivicApp.copyToClipboard('${rep.ticketId}', event)">
+                ${rep.ticketId} <i class="fa-regular fa-copy text-[10px] ml-0.5"></i>
+              </span>
               <span>${timeAgo}</span>
             </div>
 
@@ -228,11 +279,11 @@ function renderFeed(reports) {
               <span class="truncate">${rep.address || rep.wardNumber || "Nagpur"}</span>
             </div>
 
-            <!-- AI Severity Bar -->
-            <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-100 mb-1">
+            <!-- AI Rating -->
+            <div class="bg-slate-50 rounded-xl p-2 border border-slate-100 mb-1">
               <div class="flex justify-between items-center text-[10px] font-bold mb-1">
-                <span class="text-slate-500">Hazard Rating</span>
-                <span class="text-slate-800 font-bold">${rep.severityScore ? rep.severityScore.toFixed(1) : "5.0"} / 10</span>
+                <span class="text-slate-500"><i class="fa-solid fa-brain text-purple-600 mr-1"></i> Hazard Score</span>
+                <span class="text-slate-800 font-bold">${rep.severityScore ? rep.severityScore.toFixed(1) : "5.0"}/10</span>
               </div>
               <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
                 <div class="h-full rounded-full ${
@@ -243,7 +294,7 @@ function renderFeed(reports) {
           </div>
         </div>
 
-        <!-- Footer -->
+        <!-- Card Footer -->
         <div class="px-4 py-2.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between">
           <button onclick="CivicApp.toggleUpvote('${rep._id || rep.id}')" 
                   class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
@@ -266,12 +317,19 @@ function renderFeed(reports) {
     .join("");
 }
 
+// Copy ticket code
+function copyToClipboard(text, e) {
+  if (e) e.stopPropagation();
+  navigator.clipboard.writeText(text);
+  showToast(`📋 Copied ${text} to clipboard!`, "fa-copy");
+}
+
 // Toggle Upvote
 async function toggleUpvote(reportId) {
   try {
     const res = await window.CivicAPI.upvoteReport(reportId, userIdentifier);
     if (res.success) {
-      if (res.upvoted) addKarma(10);
+      if (res.upvoted) addKarma(10, "Community Upvote");
       loadReports();
     }
   } catch (err) {
@@ -279,7 +337,7 @@ async function toggleUpvote(reportId) {
   }
 }
 
-// Report Form Listeners
+// Report form listeners
 function setupReportWizardListeners() {
   const fileInput = document.getElementById("wizardPhotoInput");
   if (fileInput) fileInput.addEventListener("change", handleWizardImageScan);
@@ -294,7 +352,7 @@ function setupReportWizardListeners() {
   if (form) form.addEventListener("submit", handleReportSubmit);
 }
 
-// Handle Image Scan
+// Image Scan with visual scan grid
 async function handleWizardImageScan(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -313,9 +371,9 @@ async function handleWizardImageScan(e) {
   if (scanBox) {
     scanBox.classList.remove("hidden");
     scanBox.innerHTML = `
-      <div class="flex items-center gap-2 text-blue-600 font-semibold text-xs py-2 bg-blue-50 border border-blue-100 rounded-xl px-3">
-        <i class="fa-solid fa-circle-notch fa-spin"></i>
-        <span>AI is scanning image for category & hazard severity...</span>
+      <div class="flex items-center gap-2 text-blue-600 font-semibold text-xs py-2.5 bg-blue-50 border border-blue-100 rounded-xl px-3">
+        <i class="fa-solid fa-sparkles fa-spin"></i>
+        <span>AI Vision Engine is analyzing hazard type, depth & priority...</span>
       </div>
     `;
   }
@@ -336,24 +394,24 @@ async function handleWizardImageScan(e) {
     if (catSelect && ai.detectedCategory) catSelect.value = ai.detectedCategory;
 
     scanBox.innerHTML = `
-      <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-3 text-xs">
-        <div class="flex items-center justify-between mb-1">
+      <div class="bg-blue-50/90 border border-blue-200 rounded-2xl p-4 text-xs shadow-sm">
+        <div class="flex items-center justify-between mb-1.5">
           <span class="font-bold text-blue-900 flex items-center gap-1.5">
-            <i class="fa-solid fa-sparkles text-blue-600"></i> AI Scan Result (${(ai.confidence * 100).toFixed(0)}% Confidence)
+            <i class="fa-solid fa-brain text-blue-600"></i> AI Detection (${(ai.confidence * 100).toFixed(0)}% Match)
           </span>
           <span class="font-bold px-2 py-0.5 rounded-full text-[10px] ${
             ai.urgencyLevel === "CRITICAL" ? "bg-red-600 text-white" : "bg-blue-700 text-white"
           }">
-            ${ai.urgencyLevel} Priority
+            ${ai.urgencyLevel} Urgency
           </span>
         </div>
-        <p class="text-slate-700 mb-1.5 font-medium">${ai.descriptionSummary}</p>
+        <p class="text-slate-700 mb-2 font-medium">${ai.descriptionSummary}</p>
         <div class="flex flex-wrap gap-2 text-[10px] font-semibold text-slate-600">
-          <span class="bg-white px-2 py-0.5 rounded border border-blue-100">🏛️ Dept: ${ai.recommendedDepartment}</span>
-          <span class="bg-white px-2 py-0.5 rounded border border-blue-100">⏱️ SLA: ${ai.estimatedSlaHours}h</span>
+          <span class="bg-white px-2 py-1 rounded-md border border-blue-100">🏛️ ${ai.recommendedDepartment}</span>
+          <span class="bg-white px-2 py-1 rounded-md border border-blue-100">⏱️ SLA: ${ai.estimatedSlaHours}h</span>
           ${
             ai.potentialDuplicateDetected
-              ? `<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded border border-amber-300 font-bold">⚠️ Similar active report nearby</span>`
+              ? `<span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-md border border-amber-300 font-bold">⚠️ Existing active ticket nearby</span>`
               : ""
           }
         </div>
@@ -362,7 +420,7 @@ async function handleWizardImageScan(e) {
   } catch (err) {
     scanBox.innerHTML = `
       <div class="text-xs text-slate-600 flex items-center gap-1.5 py-1">
-        <i class="fa-solid fa-check text-emerald-600"></i> Photo attached. Ready to submit.
+        <i class="fa-solid fa-check text-emerald-600"></i> Photo loaded successfully.
       </div>
     `;
   }
@@ -392,7 +450,7 @@ function handleVoiceRecording() {
   rec.start();
 
   function resetBtn() {
-    btn.innerHTML = `<i class="fa-solid fa-microphone"></i> Speak Notes`;
+    btn.innerHTML = `<i class="fa-solid fa-microphone text-blue-600"></i> Speak Notes`;
   }
 }
 
@@ -407,7 +465,8 @@ function handleGetCurrentGPS() {
         if (window.reportPickerMap) {
           window.reportPickerMap.setView([pos.coords.latitude, pos.coords.longitude], 15);
         }
-        btn.innerHTML = `<i class="fa-solid fa-check"></i> Pinned!`;
+        btn.innerHTML = `<i class="fa-solid fa-check"></i> Located`;
+        showToast("📍 Location auto-pinned!", "fa-location-crosshairs");
         setTimeout(() => { btn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Use GPS`; }, 2000);
       },
       () => { btn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Use GPS`; }
@@ -420,13 +479,13 @@ async function handleReportSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById("wizardSubmitBtn");
   btn.disabled = true;
-  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registering Ticket...`;
 
   try {
     const formData = new FormData(e.target);
     const rep = await window.CivicAPI.createReport(formData);
 
-    addKarma(50);
+    addKarma(50, "Filed Civic Report");
     showAcknowledgementSlip(rep);
     e.target.reset();
     document.getElementById("wizardImgBox").classList.add("hidden");
@@ -440,7 +499,7 @@ async function handleReportSubmit(e) {
   }
 }
 
-// Show Acknowledgement Slip Modal
+// Printable receipt slip
 function showAcknowledgementSlip(rep) {
   const modal = document.getElementById("receiptModal");
   const box = document.getElementById("receiptContent");
@@ -449,7 +508,7 @@ function showAcknowledgementSlip(rep) {
   box.innerHTML = `
     <div id="printableReceipt" class="p-6 font-sans">
       <div class="text-center border-b border-slate-200 pb-4 mb-4">
-        <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-lg mb-2">
+        <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-xl mb-2">
           <i class="fa-solid fa-check"></i>
         </div>
         <h3 class="text-base font-bold text-slate-900">Complaint Registered Successfully</h3>
@@ -458,11 +517,11 @@ function showAcknowledgementSlip(rep) {
 
       <div class="grid grid-cols-2 gap-3 text-xs mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
         <div>
-          <span class="text-slate-500">Ticket ID:</span>
-          <p class="font-mono font-bold text-sm text-blue-600">${rep.ticketId}</p>
+          <span class="text-slate-500">Ticket Reference:</span>
+          <p class="font-mono-code font-bold text-sm text-blue-600">${rep.ticketId}</p>
         </div>
         <div>
-          <span class="text-slate-500">Date:</span>
+          <span class="text-slate-500">Date Logged:</span>
           <p class="font-bold text-slate-800">${new Date(rep.createdAt).toLocaleDateString()}</p>
         </div>
         <div>
@@ -474,7 +533,7 @@ function showAcknowledgementSlip(rep) {
           <p class="font-bold text-slate-800">${rep.assignedDepartment}</p>
         </div>
         <div class="col-span-2">
-          <span class="text-slate-500">Issue Summary:</span>
+          <span class="text-slate-500">Issue:</span>
           <p class="font-bold text-slate-800">${rep.title}</p>
         </div>
       </div>
@@ -493,7 +552,7 @@ function showAcknowledgementSlip(rep) {
   modal.classList.remove("hidden");
 }
 
-// Track Ticket by ID
+// Track Ticket
 async function trackTicketDirectly(ticketId) {
   try {
     switchTab("track-ticket");
@@ -519,7 +578,7 @@ async function trackTicketDirectly(ticketId) {
         <div class="bg-red-50 border border-red-200 rounded-2xl p-6 text-center text-red-700 text-xs">
           <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 text-red-500"></i>
           <h4 class="font-bold text-sm">Ticket Not Found</h4>
-          <p class="mt-1">No ticket matches reference '${ticketId}'. Please verify the ticket code.</p>
+          <p class="mt-1">No ticket matches reference '${ticketId}'. Please check the ticket number.</p>
         </div>
       `;
     }
@@ -537,8 +596,10 @@ function renderTrackResult(rep) {
       
       <div class="flex flex-wrap items-center justify-between border-b border-slate-100 pb-4 mb-4 gap-2">
         <div>
-          <span class="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded">${rep.ticketId}</span>
-          <h3 class="text-base font-bold text-slate-900 mt-1">${rep.title}</h3>
+          <span class="text-xs font-mono-code font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded cursor-pointer hover:bg-blue-100" onclick="CivicApp.copyToClipboard('${rep.ticketId}', event)">
+            ${rep.ticketId} <i class="fa-regular fa-copy text-[10px] ml-1"></i>
+          </span>
+          <h3 class="text-base font-bold text-slate-900 mt-1.5">${rep.title}</h3>
           <p class="text-xs text-slate-500">📍 ${rep.address || "Nagpur"}</p>
         </div>
         <div class="text-right">
@@ -557,8 +618,8 @@ function renderTrackResult(rep) {
           <p class="font-bold text-slate-800">${rep.assignedDepartment}</p>
         </div>
         <div>
-          <span class="text-slate-500">Nodal Officer:</span>
-          <p class="font-bold text-slate-800">${rep.assignedOfficer || "Desk Officer"}</p>
+          <span class="text-slate-500">Officer Assigned:</span>
+          <p class="font-bold text-slate-800">${rep.assignedOfficer || "Duty Desk"}</p>
         </div>
         <div>
           <span class="text-slate-500">Officer Phone:</span>
@@ -584,7 +645,7 @@ function renderTrackResult(rep) {
                 <span class="font-bold text-slate-800">${ev.title}</span>
                 <span class="text-[10px] text-slate-400">${new Date(ev.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
-              <p class="text-slate-600 text-[11px] mb-1">${ev.description || "Updated."}</p>
+              <p class="text-slate-600 text-[11px] mb-1">${ev.description || "Milestone updated."}</p>
               <span class="text-[9px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
                 ${ev.actorName}
               </span>
@@ -596,7 +657,7 @@ function renderTrackResult(rep) {
       </div>
 
       <button onclick="CivicApp.openDetailModal('${rep._id || rep.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 rounded-xl transition">
-        Open Interactive Details & Discussion
+        Open Interactive Modal & Discussion
       </button>
 
     </div>
@@ -614,7 +675,7 @@ async function openDetailModal(reportId) {
     container.innerHTML = `
       <div class="p-12 text-center">
         <i class="fa-solid fa-circle-notch fa-spin text-blue-600 text-2xl mb-2"></i>
-        <p class="text-slate-500 font-medium text-xs">Loading report details...</p>
+        <p class="text-slate-500 font-medium text-xs">Loading ticket file...</p>
       </div>
     `;
 
@@ -638,7 +699,9 @@ function renderDetailModalContent(rep) {
       <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
         <div>
           <div class="flex items-center gap-2 mb-1">
-            <span class="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded">${rep.ticketId}</span>
+            <span class="text-xs font-mono-code font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded cursor-pointer hover:bg-blue-100" onclick="CivicApp.copyToClipboard('${rep.ticketId}', event)">
+              ${rep.ticketId} <i class="fa-regular fa-copy text-[10px] ml-1"></i>
+            </span>
             <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${
               isResolved ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-blue-50 text-blue-700 border border-blue-200"
             }">
@@ -659,20 +722,21 @@ function renderDetailModalContent(rep) {
             rep.resolutionImageUrl
               ? `
               <div class="mb-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl p-3">
-                <span class="text-xs font-bold text-emerald-800 flex items-center gap-1.5 mb-2">
-                  <i class="fa-solid fa-circle-check text-emerald-600"></i> AI Verified Before vs After Repair
+                <span class="text-xs font-bold text-emerald-800 flex items-center justify-between mb-2">
+                  <span><i class="fa-solid fa-circle-check text-emerald-600"></i> Interactive Before / After Slider</span>
+                  <span class="text-[10px] text-emerald-700 bg-white px-2 py-0.5 rounded font-normal">Drag divider ↔</span>
                 </span>
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                  <div>
-                    <span class="text-[10px] font-bold text-slate-500 uppercase">Reported</span>
-                    <img src="${rep.imageUrl}" class="w-full h-28 object-cover rounded-lg border border-slate-200 mt-1"/>
-                  </div>
-                  <div>
-                    <span class="text-[10px] font-bold text-emerald-700 uppercase">Fixed</span>
-                    <img src="${rep.resolutionImageUrl}" class="w-full h-28 object-cover rounded-lg border border-emerald-300 mt-1"/>
+                
+                <!-- Interactive Comparison Slider -->
+                <div id="sliderBox" class="comparison-slider-container">
+                  <img src="${rep.resolutionImageUrl}" class="comparison-before-img" alt="After Repair"/>
+                  <img id="afterImgLayer" src="${rep.imageUrl}" class="comparison-after-img" alt="Before Repair"/>
+                  <div id="sliderHandle" class="comparison-handle">
+                    <i class="fa-solid fa-arrows-left-right"></i>
                   </div>
                 </div>
-                <p class="text-xs text-emerald-900 font-medium">${rep.resolutionNotes || "Work completed."}</p>
+
+                <p class="text-xs text-emerald-900 font-medium mt-2">${rep.resolutionNotes || "Repaired and visually verified."}</p>
               </div>
             `
               : `
@@ -692,11 +756,11 @@ function renderDetailModalContent(rep) {
               <span class="font-bold text-blue-600">${rep.assignedDepartment}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-slate-500">Officer:</span>
-              <span class="font-bold text-slate-800">${rep.assignedOfficer || "Desk Officer"}</span>
+              <span class="text-slate-500">Nodal Officer:</span>
+              <span class="font-bold text-slate-800">${rep.assignedOfficer || "Duty Officer"} (${rep.officerContact || "+91 712-2561234"})</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-slate-500">Community Votes:</span>
+              <span class="text-slate-500">Community Support:</span>
               <span class="font-bold text-emerald-600">👍 ${rep.upvotes || 1} Votes</span>
             </div>
           </div>
@@ -723,7 +787,7 @@ function renderDetailModalContent(rep) {
             </div>
 
             <div class="flex gap-2">
-              <input id="newCommentInput" type="text" placeholder="Add update or note..." class="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <input id="newCommentInput" type="text" placeholder="Add comment or update..." class="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" />
               <button onclick="CivicApp.postComment('${rep._id || rep.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">
                 Post
               </button>
@@ -775,6 +839,41 @@ function renderDetailModalContent(rep) {
 
     </div>
   `;
+
+  // Initialize Before/After Slider if present
+  setTimeout(() => initComparisonSlider(), 50);
+}
+
+// Comparison Slider
+function initComparisonSlider() {
+  const container = document.getElementById("sliderBox");
+  const afterImg = document.getElementById("afterImgLayer");
+  const handle = document.getElementById("sliderHandle");
+  if (!container || !afterImg || !handle) return;
+
+  let isDragging = false;
+
+  const move = (e) => {
+    if (!isDragging) return;
+    const rect = container.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    let x = clientX - rect.left;
+    x = Math.max(0, Math.min(x, rect.width));
+    const percentage = (x / rect.width) * 100;
+    afterImg.style.width = percentage + "%";
+    handle.style.left = percentage + "%";
+  };
+
+  const start = (e) => { isDragging = true; move(e); };
+  const stop = () => { isDragging = false; };
+
+  container.addEventListener("mousedown", start);
+  window.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", stop);
+
+  container.addEventListener("touchstart", start);
+  window.addEventListener("touchmove", move);
+  window.addEventListener("touchend", stop);
 }
 
 // Post comment
@@ -791,12 +890,13 @@ async function postComment(reportId) {
     });
     currentActiveReport = updated;
     renderDetailModalContent(updated);
+    showToast("💬 Comment posted!", "fa-comment");
   } catch (err) {
     alert("Error adding comment: " + err.message);
   }
 }
 
-// Analytics and Admin Dashboard loader
+// Analytics and Admin
 async function loadAnalyticsAndAdmin() {
   try {
     const stats = await window.CivicAPI.getAdminStats();
@@ -882,7 +982,7 @@ async function renderAdminDispatchTable() {
     .map(
       (r) => `
     <tr class="border-b border-slate-100 hover:bg-slate-50 text-xs">
-      <td class="py-3 px-4 font-mono font-bold text-blue-600">${r.ticketId}</td>
+      <td class="py-3 px-4 font-mono-code font-bold text-blue-600">${r.ticketId}</td>
       <td class="py-3 px-4 font-semibold text-slate-900 max-w-[190px] truncate">${r.title}</td>
       <td class="py-3 px-4 text-slate-600">${r.wardNumber || "Ward 12"}</td>
       <td class="py-3 px-4">
@@ -920,6 +1020,7 @@ async function changeReportStatus(reportId, newStatus) {
       actorName: "Municipal Admin",
       actorRole: "ADMIN",
     });
+    showToast(`Status updated to ${newStatus}`, "fa-route");
     loadAnalyticsAndAdmin();
     loadReports();
   } catch (err) {
@@ -930,7 +1031,7 @@ async function changeReportStatus(reportId, newStatus) {
 async function resetDemoData() {
   if (confirm("Reset all reports to clean seed demo data?")) {
     await window.CivicAPI.resetSeedData();
-    alert("Demo data reset successfully!");
+    showToast("Clean demo dataset re-seeded!", "fa-rotate");
     loadReports();
     if (currentTab === "admin" || currentTab === "analytics") loadAnalyticsAndAdmin();
   }
@@ -956,4 +1057,6 @@ window.CivicApp = {
   showAcknowledgementSlip,
   postComment,
   resetDemoData,
+  copyToClipboard,
+  toggleTheme,
 };
