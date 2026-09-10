@@ -1,0 +1,344 @@
+[
+  {
+    "_id": "ce_seed_101",
+    "id": "ce_seed_101",
+    "ticketId": "CE-2609-A8F29B",
+    "title": "Deep Pothole on Main Arterial Road",
+    "description": "Massive crater on the right carriage lane near the signal junction causing serious skidding hazard for two-wheelers and slowing down peak hour traffic.",
+    "category": "Pothole & Road Damage",
+    "subcategory": "Severe Asphalt Crater",
+    "severityScore": 8.8,
+    "urgencyLevel": "CRITICAL",
+    "aiConfidence": 0.96,
+    "aiRawAnalysis": {
+      "detectedCategory": "Pothole & Road Damage",
+      "severityScore": 8.8,
+      "urgencyLevel": "CRITICAL",
+      "confidence": 0.96,
+      "recommendedDepartment": "Public Works & Roads (PWD)",
+      "keyHazards": [
+        "Two-wheeler skidding risk",
+        "Vehicular tyre damage",
+        "Traffic bottleneck"
+      ]
+    },
+    "status": "IN_PROGRESS",
+    "assignedDepartment": "Public Works & Roads (PWD)",
+    "assignedOfficer": "Er. Rajesh Verma (Roads Div II)",
+    "resolutionNotes": "Crew dispatched with cold-mix asphalt patch unit. Road rolling underway.",
+    "resolutionImageUrl": "",
+    "latitude": 21.1458,
+    "longitude": 79.0882,
+    "address": "West High Court Road, Dharampeth",
+    "landmark": "Near Coffee House Square",
+    "wardNumber": "Ward 12 - Dharampeth",
+    "imageUrl": "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80",
+    "reporterName": "Ananya Sharma",
+    "reporterPhone": "+91 98230 44120",
+    "upvotes": 19,
+    "upvotedBy": [
+      "guest_1",
+      "guest_2",
+      "guest_3",
+      "test_user"
+    ],
+    "isDuplicate": false,
+    "duplicateOfTicketId": null,
+    "estimatedSlaHours": 24,
+    "createdAt": "2026-09-09T14:02:59.050Z",
+    "updatedAt": "2026-09-10T08:11:38.869Z",
+    "timelineEvents": [
+      {
+        "status": "REPORTED",
+        "title": "Issue Reported by Citizen",
+        "description": "Ticket registered with AI Urgency [CRITICAL]. Assigned to PWD Roads.",
+        "actorName": "Ananya Sharma",
+        "actorRole": "CITIZEN",
+        "createdAt": "2026-09-09T14:02:59.052Z"
+      },
+      {
+        "status": "VERIFIED",
+        "title": "AI Triage Verification Complete",
+        "description": "Vision AI confirmed 8.8 severity score and dispatched priority work order.",
+        "actorName": "CivicEye AI Engine",
+        "actorRole": "SYSTEM",
+        "createdAt": "2026-09-09T15:02:59.052Z"
+      },
+      {
+        "status": "IN_PROGRESS",
+        "title": "Field Crew Dispatched On-Site",
+        "description": "PWD Hotmix Patching Team #4 en-route with asphalt roller.",
+        "actorName": "Er. Rajesh Verma",
+        "actorRole": "OFFICER",
+        "createdAt": "2026-09-10T06:02:59.052Z"
+      }
+    ],
+    "comments": [
+      {
+        "userName": "PWD Control",
+        "userRole": "OFFICER",
+        "text": "Field team active on site",
+        "createdAt": "2026-09-10T08:11:38.869Z"
+      }
+    ]
+  },
+  {
+    "_id": "ce_seed_102",
+    "id": "ce_seed_102",
+    "ticketId": "CE-2609-C39E11",
+    "title": "Overflowing Commercial Waste Dumpster",
+    "description": "Garbage bin completely filled and overflowing onto the pedestrian footpath. Debris spreading across the corner causing severe odor and stray animal gathering.",
+    "category": "Garbage & Sanitation",
+    "subcategory": "Commercial Bin Spillover",
+    "severityScore": 7.2,
+    "urgencyLevel": "HIGH",
+    "aiConfidence": 0.93,
+    "aiRawAnalysis": {
+      "detectedCategory": "Garbage & Sanitation",
+      "severityScore": 7.2,
+      "urgencyLevel": "HIGH",
+      "confidence": 0.93,
+      "recommendedDepartment": "Solid Waste Management",
+      "keyHazards": [
+        "Bacterial contamination",
+        "Footpath blockage",
+        "Odor pollution"
+      ]
+    },
+    "status": "ASSIGNED",
+    "assignedDepartment": "Solid Waste Management",
+    "assignedOfficer": "Sanitation Supervisor Sanjay Patil",
+    "resolutionNotes": "Scheduled for morning compacting truck route.",
+    "resolutionImageUrl": "",
+    "latitude": 21.1524,
+    "longitude": 79.0805,
+    "address": "Residency Road, Sadar Market",
+    "landmark": "Opposite Rajwada Palace Gate",
+    "wardNumber": "Ward 15 - Sadar",
+    "imageUrl": "https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?w=800&auto=format&fit=crop&q=80",
+    "reporterName": "Rohan Deshmukh",
+    "reporterPhone": "+91 97654 11290",
+    "upvotes": 11,
+    "upvotedBy": [
+      "guest_4",
+      "guest_5"
+    ],
+    "isDuplicate": false,
+    "duplicateOfTicketId": null,
+    "estimatedSlaHours": 12,
+    "createdAt": "2026-09-09T20:02:59.052Z",
+    "updatedAt": "2026-09-10T02:02:59.052Z",
+    "timelineEvents": [
+      {
+        "status": "REPORTED",
+        "title": "Reported by Citizen",
+        "description": "Photo submitted of overflowing commercial bin.",
+        "actorName": "Rohan Deshmukh",
+        "actorRole": "CITIZEN",
+        "createdAt": "2026-09-09T20:02:59.052Z"
+      },
+      {
+        "status": "ASSIGNED",
+        "title": "Work Order Assigned to Sanitation Dept",
+        "description": "Assigned to Compactor Route #7 (Sadar Zone).",
+        "actorName": "Municipal Control Room",
+        "actorRole": "ADMIN",
+        "createdAt": "2026-09-10T02:02:59.052Z"
+      }
+    ]
+  },
+  {
+    "_id": "ce_seed_103",
+    "id": "ce_seed_103",
+    "ticketId": "CE-2609-F91A80",
+    "title": "Broken Streetlight & Exposed Electrical Wiring",
+    "description": "Streetlight pole bent at 30 degrees with open junction box exposing high voltage cables at child height. Complete darkness across 50m walkway.",
+    "category": "Streetlight & Electrical",
+    "subcategory": "Exposed High-Voltage Cable",
+    "severityScore": 9.1,
+    "urgencyLevel": "CRITICAL",
+    "aiConfidence": 0.97,
+    "aiRawAnalysis": {
+      "detectedCategory": "Streetlight & Electrical",
+      "severityScore": 9.1,
+      "urgencyLevel": "CRITICAL",
+      "confidence": 0.97,
+      "recommendedDepartment": "Electricity & Street Lighting",
+      "keyHazards": [
+        "Electrocution risk",
+        "Low nocturnal visibility",
+        "Structural collapse of pole"
+      ]
+    },
+    "status": "RESOLVED",
+    "assignedDepartment": "Electricity & Street Lighting",
+    "assignedOfficer": "Junior Engineer K. Nair",
+    "resolutionNotes": "Pole safely straightened, junction box sealed with tamper-proof lock, and LED luminaire replaced. Power restored.",
+    "resolutionImageUrl": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=800&auto=format&fit=crop&q=80",
+    "latitude": 21.1402,
+    "longitude": 79.0734,
+    "address": "Temple Road, Civil Lines",
+    "landmark": "Behind High Court Complex",
+    "wardNumber": "Ward 14 - Civil Lines",
+    "imageUrl": "https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?w=800&auto=format&fit=crop&q=80",
+    "reporterName": "Pooja Kulkarni",
+    "reporterPhone": "+91 94221 88301",
+    "upvotes": 24,
+    "upvotedBy": [
+      "guest_1",
+      "guest_2",
+      "guest_7"
+    ],
+    "isDuplicate": false,
+    "duplicateOfTicketId": null,
+    "estimatedSlaHours": 12,
+    "createdAt": "2026-09-08T20:02:59.052Z",
+    "updatedAt": "2026-09-10T00:02:59.052Z",
+    "timelineEvents": [
+      {
+        "status": "REPORTED",
+        "title": "Reported by Citizen",
+        "description": "Severe hazard flagged: Exposed wire near sidewalk.",
+        "actorName": "Pooja Kulkarni",
+        "actorRole": "CITIZEN",
+        "createdAt": "2026-09-08T20:02:59.052Z"
+      },
+      {
+        "status": "IN_PROGRESS",
+        "title": "Emergency Line Crew Dispatched",
+        "description": "Power de-energized on local feeder for repair work.",
+        "actorName": "Electricity Board",
+        "actorRole": "OFFICER",
+        "createdAt": "2026-09-09T08:02:59.052Z"
+      },
+      {
+        "status": "RESOLVED",
+        "title": "AI Resolution Verified & Closed",
+        "description": "After-photo verified by AI Inspector. Wiring safely insulated.",
+        "actorName": "CivicEye AI Inspector",
+        "actorRole": "SYSTEM",
+        "createdAt": "2026-09-10T00:02:59.052Z"
+      }
+    ]
+  },
+  {
+    "_id": "ce_seed_104",
+    "id": "ce_seed_104",
+    "ticketId": "CE-2609-B52D44",
+    "title": "Stormwater Drain Choke & Street Inundation",
+    "description": "Clogged stormwater grating covered with plastic waste causing 8-inch stagnant water logging on the intersection after recent rainfall.",
+    "category": "Waterlogging & Drainage",
+    "subcategory": "Storm Drain Clogging",
+    "severityScore": 8.4,
+    "urgencyLevel": "HIGH",
+    "aiConfidence": 0.94,
+    "aiRawAnalysis": {
+      "detectedCategory": "Waterlogging & Drainage",
+      "severityScore": 8.4,
+      "urgencyLevel": "HIGH",
+      "confidence": 0.94,
+      "recommendedDepartment": "Water Supply & Sewerage Board",
+      "keyHazards": [
+        "Mosquito breeding ground",
+        "Vehicular stalling",
+        "Road foundation erosion"
+      ]
+    },
+    "status": "REPORTED",
+    "assignedDepartment": "Water Supply & Sewerage Board",
+    "assignedOfficer": "Unassigned",
+    "resolutionNotes": "",
+    "resolutionImageUrl": "",
+    "latitude": 21.1345,
+    "longitude": 79.0851,
+    "address": "Sitabuldi Main Road",
+    "landmark": "Near Variety Square Metro Station",
+    "wardNumber": "Ward 18 - Sitabuldi",
+    "imageUrl": "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=800&auto=format&fit=crop&q=80",
+    "reporterName": "Vikram Joshi",
+    "reporterPhone": "+91 99220 77154",
+    "upvotes": 9,
+    "upvotedBy": [
+      "guest_3"
+    ],
+    "isDuplicate": false,
+    "duplicateOfTicketId": null,
+    "estimatedSlaHours": 24,
+    "createdAt": "2026-09-10T04:02:59.052Z",
+    "updatedAt": "2026-09-10T04:02:59.052Z",
+    "timelineEvents": [
+      {
+        "status": "REPORTED",
+        "title": "Report Submitted",
+        "description": "Citizen logged drainage flooding with photo.",
+        "actorName": "Vikram Joshi",
+        "actorRole": "CITIZEN",
+        "createdAt": "2026-09-10T04:02:59.052Z"
+      }
+    ]
+  },
+  {
+    "_id": "ce_seed_105",
+    "id": "ce_seed_105",
+    "ticketId": "CE-2609-E77A19",
+    "title": "Fallen Tree Bough Blocking Left Traffic Lane",
+    "description": "Large bough snapped from Gulmohar tree during high winds and fell across the road, blocking vehicular traffic moving toward Medical Square.",
+    "category": "Road Obstruction & Traffic",
+    "subcategory": "Fallen Tree Limb",
+    "severityScore": 7.9,
+    "urgencyLevel": "HIGH",
+    "aiConfidence": 0.95,
+    "aiRawAnalysis": {
+      "detectedCategory": "Road Obstruction & Traffic",
+      "severityScore": 7.9,
+      "urgencyLevel": "HIGH",
+      "confidence": 0.95,
+      "recommendedDepartment": "Horticulture & Forestry",
+      "keyHazards": [
+        "Collision risk for vehicles",
+        "Traffic lane blockage"
+      ]
+    },
+    "status": "IN_PROGRESS",
+    "assignedDepartment": "Horticulture & Forestry",
+    "assignedOfficer": "Forestry Squad Leader Ramesh Gawande",
+    "resolutionNotes": "Woodcutter team deployed with hydraulic chainsaw.",
+    "resolutionImageUrl": "",
+    "latitude": 21.1278,
+    "longitude": 79.0965,
+    "address": "Medical College Road",
+    "landmark": "Near GMC Hostel Gate 2",
+    "wardNumber": "Ward 22 - Medical",
+    "imageUrl": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80",
+    "reporterName": "Dr. Snehal T",
+    "reporterPhone": "+91 98810 55432",
+    "upvotes": 14,
+    "upvotedBy": [
+      "guest_1",
+      "guest_8"
+    ],
+    "isDuplicate": false,
+    "duplicateOfTicketId": null,
+    "estimatedSlaHours": 6,
+    "createdAt": "2026-09-10T03:02:59.052Z",
+    "updatedAt": "2026-09-10T07:02:59.052Z",
+    "timelineEvents": [
+      {
+        "status": "REPORTED",
+        "title": "Reported by Citizen",
+        "description": "Citizen reported fallen tree limb blocking road lane.",
+        "actorName": "Dr. Snehal T",
+        "actorRole": "CITIZEN",
+        "createdAt": "2026-09-10T03:02:59.052Z"
+      },
+      {
+        "status": "IN_PROGRESS",
+        "title": "Chainsaw Squad Dispatched",
+        "description": "Quick Response Team #2 on site cutting and clearing branches.",
+        "actorName": "Horticulture Dept",
+        "actorRole": "OFFICER",
+        "createdAt": "2026-09-10T07:02:59.052Z"
+      }
+    ]
+  }
+]

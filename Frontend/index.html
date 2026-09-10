@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CivicEye Nagpur | Citizen Grievance Redressal & Smart City AI</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col antialiased">
+
+  <!-- Official Tricolor Govt Banner -->
+  <div class="gov-tricolor-strip"></div>
+
+  <!-- Govt Header Bar -->
+  <div class="bg-slate-900 text-slate-200 py-1.5 px-4 text-[11px] border-b border-slate-800">
+    <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-amber-400">🏛️ Government of Maharashtra</span>
+        <span>|</span>
+        <span class="text-slate-300">Nagpur Smart & Sustainable City Development Corp (NSSCDCL)</span>
+      </div>
+      <div class="flex items-center gap-4 text-slate-300">
+        <span class="hidden sm:inline">📞 24x7 Toll Free: <strong class="text-white">1800-233-3764</strong></span>
+        <span>🚨 Emergency: <strong class="text-red-400">112</strong></span>
+        <span>⚡ Power: <strong class="text-amber-400">1912</strong></span>
+        <span>💧 Water: <strong class="text-blue-300">0712-2561122</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="bg-blue-900 text-white sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-18 py-2">
+        
+        <!-- Brand / Seal -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="CivicApp.switchTab('feed')">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-400 to-orange-500 text-blue-950 flex items-center justify-center font-black text-xl shadow-lg">
+            <i class="fa-solid fa-eye text-slate-900"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-lg font-extrabold tracking-tight text-white leading-none">
+                CivicEye <span class="text-amber-400">Nagpur</span>
+              </h1>
+              <span class="text-[10px] uppercase font-black bg-blue-800 border border-blue-700 text-blue-200 px-2 py-0.5 rounded">
+                Official
+              </span>
+            </div>
+            <p class="text-[11px] text-blue-200 font-medium mt-0.5">Municipal AI Grievance Redressal & Hazard Monitoring</p>
+          </div>
+        </div>
+
+        <!-- Top Ward Filter Selector -->
+        <div class="hidden md:flex items-center gap-2 bg-blue-950/70 border border-blue-700/60 px-3 py-1.5 rounded-xl text-xs">
+          <i class="fa-solid fa-location-dot text-amber-400"></i>
+          <span class="text-blue-200 font-semibold">City Zone:</span>
+          <select id="topWardFilter" class="bg-transparent text-white font-bold focus:outline-none cursor-pointer">
+            <option value="All" class="bg-slate-900">All Wards (Nagpur Central)</option>
+            <option value="Ward 12" class="bg-slate-900">Ward 12 - Dharampeth</option>
+            <option value="Ward 14" class="bg-slate-900">Ward 14 - Civil Lines</option>
+            <option value="Ward 15" class="bg-slate-900">Ward 15 - Sadar</option>
+            <option value="Ward 18" class="bg-slate-900">Ward 18 - Sitabuldi</option>
+            <option value="Ward 22" class="bg-slate-900">Ward 22 - Medical</option>
+          </select>
+        </div>
+
+        <!-- Right User Karma & File CTA -->
+        <div class="flex items-center gap-3">
+          <div class="bg-amber-400/20 border border-amber-400/40 text-amber-300 px-3 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5">
+            <i class="fa-solid fa-trophy text-amber-400"></i>
+            <span id="userKarmaBadge">140 Karma</span>
+          </div>
+
+          <button onclick="CivicApp.switchTab('file-report')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-md transition">
+            <i class="fa-solid fa-plus-circle"></i>
+            <span>Register Complaint</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Navigation Tabs Bar -->
+      <nav class="flex items-center gap-1 overflow-x-auto py-2 border-t border-blue-800/80 text-xs font-bold scrollbar-none">
+        <button data-tab="feed" class="nav-tab-btn px-3.5 py-1.5 rounded-lg bg-blue-800 text-white flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-map-location-dot"></i> Live Grievance Map & Feed
+        </button>
+        <button data-tab="file-report" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-900/60 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-file-circle-plus"></i> File Complaint (AI Scan)
+        </button>
+        <button data-tab="track-ticket" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-900/60 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-magnifying-glass"></i> Track Ticket Status
+        </button>
+        <button data-tab="leaderboard" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-900/60 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-award"></i> Citizen Hall of Fame
+        </button>
+        <button data-tab="notices" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-900/60 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-bullhorn"></i> Municipal Advisories
+        </button>
+        <button data-tab="admin" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-900/60 flex items-center gap-1.5 transition ml-auto">
+          <i class="fa-solid fa-shield-halved text-amber-300"></i> Officer Command SLA
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Live Emergency & Advisory Ticker -->
+  <div class="bg-blue-50 border-b border-blue-200 py-1.5 px-4 text-xs font-medium text-blue-900">
+    <div class="max-w-7xl mx-auto flex items-center gap-3">
+      <span class="bg-blue-600 text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded shrink-0">
+        📢 City Notice
+      </span>
+      <div class="ticker-wrap flex-1 text-slate-700">
+        <div class="ticker-move">
+          <strong>NMC Update:</strong> Road resurfacing and asphalt patch drive active in Ward 12 (Dharampeth) & Ward 15 (Sadar) • Stormwater drain desilting completed in Sitabuldi Zone • Report power outages directly to 1912 • Track any complaint with your reference ticket code anytime!
+        </div>
+      </div>
+      <button onclick="CivicApp.resetDemoData()" class="text-[10px] font-bold text-slate-500 hover:text-slate-800 underline shrink-0">
+        Reset Demo Data
+      </button>
+    </div>
+  </div>
+
+  <!-- TAB 1: LIVE GRIEVANCE MAP & COMMUNITY FEED -->
+  <section id="tabSection_feed" class="tab-section flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- Hero Banner with Quick Search -->
+    <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 mb-6 shadow-lg border border-slate-800">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 px-3 py-1 rounded-full text-xs font-semibold text-blue-300 mb-3">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          AI Vision Triage & Geo-Clustering Engine Active
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black tracking-tight mb-2">
+          Nagpur Citizen Grievance Portal
+        </h2>
+        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-4">
+          Report road craters, overflowing garbage, failed streetlights, or drainage overflow. Our AI instantly classifies severity, assigns work orders to municipal departments, and tracks SLA in real-time.
+        </p>
+
+        <!-- Quick Track Box -->
+        <div class="flex items-center gap-2 max-w-lg bg-white/10 backdrop-blur border border-white/20 p-1.5 rounded-2xl">
+          <input id="heroTrackInput" type="text" placeholder="Enter Ticket Reference (e.g. CE-2609-A8F29B)..." class="bg-transparent flex-1 px-3 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none" />
+          <button id="heroTrackBtn" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition">
+            Track Ticket
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Filter Chips -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
+      <button data-category="All" class="category-chip chip-active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white border border-transparent shrink-0 shadow-sm transition">
+        🌐 All Categories
+      </button>
+      <button data-category="Pothole & Road Damage" class="category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 shrink-0 transition">
+        🚧 Potholes & Roads
+      </button>
+      <button data-category="Garbage & Sanitation" class="category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 shrink-0 transition">
+        🗑️ Garbage & Waste
+      </button>
+      <button data-category="Streetlight & Electrical" class="category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 shrink-0 transition">
+        💡 Streetlights & Power
+      </button>
+      <button data-category="Waterlogging & Drainage" class="category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 shrink-0 transition">
+        🌊 Waterlogging & Drains
+      </button>
+      <button data-category="Road Obstruction & Traffic" class="category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 shrink-0 transition">
+        🌳 Obstructions & Trees
+      </button>
+    </div>
+
+    <!-- Search & Filter Controls Bar -->
+    <div class="gov-card p-3.5 mb-6 flex flex-wrap items-center justify-between gap-3">
+      <div class="relative flex-1 min-w-[240px]">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input id="searchInput" type="text" placeholder="Search by ticket ID, road name, ward, or description..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+      </div>
+
+      <div class="flex items-center gap-2">
+        <select id="statusFilter" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl px-3 py-2">
+          <option value="All">All Statuses</option>
+          <option value="REPORTED">Reported</option>
+          <option value="ASSIGNED">Assigned</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="RESOLVED">Resolved</option>
+        </select>
+
+        <select id="sortByFilter" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl px-3 py-2">
+          <option value="newest">🕒 Newest First</option>
+          <option value="upvotes">👍 Most Supported</option>
+          <option value="severity">🚨 Severity Score</option>
+          <option value="sla">⏱️ SLA Limit</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Main Grid: Map & Issues Feed -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left: Interactive Map -->
+      <div class="lg:col-span-5 flex flex-col">
+        <div class="gov-card p-4 flex-1 flex flex-col">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-map-location-dot text-blue-700"></i> City Grievance Heatmap
+            </h3>
+            <span class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-lg">
+              Nagpur Zero Mile
+            </span>
+          </div>
+
+          <div id="mapContainer" class="w-full flex-1 min-h-[460px] rounded-2xl overflow-hidden border border-slate-200"></div>
+
+          <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600 font-medium">
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Critical</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-orange-600"></span> High</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Medium</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span> Resolved</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Live Cards Feed -->
+      <div class="lg:col-span-7">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-tower-broadcast text-blue-700"></i> Public Redressal Feed
+          </h3>
+          <span id="activeReportCount" class="text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-1 rounded-xl">
+            Loading...
+          </span>
+        </div>
+
+        <div id="reportsFeed" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- TAB 2: MULTI-STEP FILE COMPLAINT WIZARD -->
+  <section id="tabSection_file-report" class="tab-section hidden flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="gov-card p-6 sm:p-8">
+      
+      <div class="border-b border-slate-200 pb-4 mb-6 flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-extrabold text-slate-900">Register Public Civic Complaint</h2>
+          <p class="text-xs text-slate-500">Official citizen grievance submission with Computer Vision triage</p>
+        </div>
+        <span class="text-xs font-bold bg-amber-100 text-amber-800 px-3 py-1 rounded-lg border border-amber-300">
+          +50 Civic Karma
+        </span>
+      </div>
+
+      <form id="wizardReportForm" class="space-y-6">
+        
+        <!-- Step 1: Upload Photo -->
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-800">
+            1. Evidence Photo <span class="text-blue-600">(AI auto-scans hazard on upload)</span>
+          </label>
+          <div class="relative border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-5 text-center cursor-pointer transition bg-slate-50">
+            <input id="wizardPhotoInput" name="image" type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" required />
+            
+            <div id="wizardUploadPlaceholder" class="space-y-1">
+              <i class="fa-solid fa-camera-retro text-3xl text-blue-600"></i>
+              <p class="text-xs font-bold text-slate-800">Click to Snap Photo or Drag & Drop File</p>
+              <p class="text-[11px] text-slate-400">JPG, PNG, WebP format (Mobile camera supported)</p>
+            </div>
+
+            <div id="wizardImgBox" class="hidden">
+              <img id="wizardImgPreview" class="max-h-52 mx-auto rounded-xl object-cover shadow-sm" alt="Preview" />
+              <p class="text-[11px] text-blue-600 font-bold mt-2"><i class="fa-solid fa-rotate"></i> Change Photo</p>
+            </div>
+          </div>
+
+          <div id="wizardAiScanBox" class="hidden"></div>
+        </div>
+
+        <!-- Step 2: Hazard Title & Category -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-800 mb-1">Issue Headline / Work Order Title</label>
+            <input id="wizardTitle" name="title" type="text" placeholder="e.g. Hazardous Asphalt Pothole on High Court Road" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500/20" required />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-800 mb-1">Category Classification</label>
+            <select id="wizardCategory" name="category" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-blue-500/20">
+              <option value="Pothole & Road Damage">🚧 Pothole & Road Damage</option>
+              <option value="Garbage & Sanitation">🗑️ Garbage & Sanitation</option>
+              <option value="Streetlight & Electrical">💡 Streetlight & Electrical</option>
+              <option value="Waterlogging & Drainage">🌊 Waterlogging & Drainage</option>
+              <option value="Road Obstruction & Traffic">🌳 Road Obstruction & Traffic</option>
+              <option value="Public Property Damage">🏢 Public Property Damage</option>
+              <option value="General Civic Issue">🌐 General Civic Issue</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Step 3: Location & Ward Selector -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-bold text-slate-800">2. Geo-Tag Location on City Map</label>
+            <button type="button" id="wizardGpsBtn" class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-lg flex items-center gap-1 hover:bg-emerald-100 transition">
+              <i class="fa-solid fa-location-crosshairs"></i> Use GPS
+            </button>
+          </div>
+
+          <div id="pickerMapContainer" class="w-full h-44 rounded-xl border border-slate-200 overflow-hidden mb-2.5"></div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <input id="reportAddress" name="address" type="text" placeholder="Street Address / Road Name" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl" />
+            <input id="reportLandmark" name="landmark" type="text" placeholder="Nearby Landmark (e.g. Near Metro Gate)" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl" />
+            <select id="reportWardSelect" name="wardNumber" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-700">
+              <option value="Ward 12 - Dharampeth">Ward 12 - Dharampeth</option>
+              <option value="Ward 14 - Civil Lines">Ward 14 - Civil Lines</option>
+              <option value="Ward 15 - Sadar">Ward 15 - Sadar</option>
+              <option value="Ward 18 - Sitabuldi">Ward 18 - Sitabuldi</option>
+              <option value="Ward 22 - Medical">Ward 22 - Medical</option>
+            </select>
+          </div>
+
+          <input id="reportLat" name="latitude" type="hidden" value="21.1458" />
+          <input id="reportLng" name="longitude" type="hidden" value="79.0882" />
+        </div>
+
+        <!-- Step 4: Description & Voice Notes -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-slate-800">3. Hazard Description & Safety Risks</label>
+            <button type="button" id="wizardVoiceBtn" class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1 transition">
+              <i class="fa-solid fa-microphone text-blue-600"></i> Speak Notes
+            </button>
+          </div>
+          <textarea id="wizardNotes" name="description" rows="2" placeholder="Describe the safety hazard, approximate depth, or traffic impact..." class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500/20"></textarea>
+        </div>
+
+        <!-- Step 5: Citizen Contact -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100">
+          <div>
+            <label class="block text-xs font-bold text-slate-800 mb-1">Citizen Name</label>
+            <input name="reporterName" type="text" value="Civic Citizen" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-800 mb-1">Mobile Number (For SMS Tracking)</label>
+            <input name="reporterPhone" type="tel" placeholder="+91 98XXX XXXXX" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+          </div>
+        </div>
+
+        <!-- Submit CTA -->
+        <button id="wizardSubmitBtn" type="submit" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-3.5 rounded-2xl text-sm shadow-md transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i> Register Official Complaint & Generate Token
+        </button>
+
+      </form>
+    </div>
+  </section>
+
+  <!-- TAB 3: TRACK TICKET STATUS BY REFERENCE -->
+  <section id="tabSection_track-ticket" class="tab-section hidden flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="gov-card p-6 sm:p-8 mb-6">
+      <h2 class="text-xl font-extrabold text-slate-900 mb-1">Track Grievance Redressal Status</h2>
+      <p class="text-xs text-slate-500 mb-4">Enter your official municipal grievance reference token to view live SLA tracking</p>
+
+      <div class="flex gap-2 max-w-xl">
+        <input id="trackTicketInput" type="text" placeholder="e.g. CE-2609-A8F29B" class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono-code font-bold focus:ring-2 focus:ring-blue-500/20" />
+        <button onclick="CivicApp.trackTicketDirectly(document.getElementById('trackTicketInput').value)" class="bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition">
+          Search
+        </button>
+      </div>
+    </div>
+
+    <div id="ticketTrackResult">
+      <div class="gov-card p-8 text-center text-slate-400 text-xs">
+        <i class="fa-solid fa-magnifying-glass-location text-4xl text-slate-300 mb-2"></i>
+        <p>Enter ticket ID above or click any card on the city feed to track status.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: CITIZEN HALL OF FAME & KARMA LEADERBOARD -->
+  <section id="tabSection_leaderboard" class="tab-section hidden flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="gov-card p-5 bg-gradient-to-br from-amber-500 to-orange-600 text-white">
+        <span class="text-xs font-bold uppercase opacity-90">Your Civic Standing</span>
+        <h3 class="text-3xl font-black mt-1">140 Points</h3>
+        <p class="text-xs opacity-90 mt-1">Rank #4 in Ward 12 (Dharampeth)</p>
+      </div>
+      <div class="gov-card p-5 bg-gradient-to-br from-blue-700 to-indigo-800 text-white">
+        <span class="text-xs font-bold uppercase opacity-90">City Impact Metric</span>
+        <h3 class="text-3xl font-black mt-1">84 Potholes</h3>
+        <p class="text-xs opacity-90 mt-1">Patched & Verified by Citizens this month</p>
+      </div>
+      <div class="gov-card p-5 bg-gradient-to-br from-emerald-600 to-teal-700 text-white">
+        <span class="text-xs font-bold uppercase opacity-90">Waste Diverted</span>
+        <h3 class="text-3xl font-black mt-1">1,420 Kg</h3>
+        <p class="text-xs opacity-90 mt-1">Cleared via sanitation complaints</p>
+      </div>
+    </div>
+
+    <!-- Leaderboard Table -->
+    <div class="gov-card p-6">
+      <h3 class="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-trophy text-amber-500"></i> Top Citizen Contributors (Nagpur Metro)
+      </h3>
+
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-3.5 bg-amber-50/80 rounded-2xl border border-amber-200 text-xs">
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-full bg-amber-400 text-slate-950 font-black flex items-center justify-center">1</span>
+            <div>
+              <p class="font-bold text-slate-900">Adv. Pooja Kulkarni</p>
+              <span class="text-[10px] text-slate-500">Ward 14 (Civil Lines) • 18 Complaints Verified</span>
+            </div>
+          </div>
+          <span class="font-extrabold text-amber-800 bg-amber-100 px-3 py-1 rounded-full">420 Karma</span>
+        </div>
+
+        <div class="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-full bg-slate-300 text-slate-800 font-bold flex items-center justify-center">2</span>
+            <div>
+              <p class="font-bold text-slate-900">Dr. Snehal Tandale</p>
+              <span class="text-[10px] text-slate-500">Ward 22 (Medical) • 12 Complaints Verified</span>
+            </div>
+          </div>
+          <span class="font-extrabold text-blue-700 bg-blue-50 px-3 py-1 rounded-full">310 Karma</span>
+        </div>
+
+        <div class="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-full bg-amber-700 text-white font-bold flex items-center justify-center">3</span>
+            <div>
+              <p class="font-bold text-slate-900">Ananya Sharma</p>
+              <span class="text-[10px] text-slate-500">Ward 12 (Dharampeth) • 9 Complaints Verified</span>
+            </div>
+          </div>
+          <span class="font-extrabold text-blue-700 bg-blue-50 px-3 py-1 rounded-full">270 Karma</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 5: MUNICIPAL NOTICES & ADVISORIES -->
+  <section id="tabSection_notices" class="tab-section hidden flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="gov-card p-6 sm:p-8">
+      <h2 class="text-xl font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-bullhorn text-blue-700"></i> Official Municipal Advisories & Works
+      </h2>
+
+      <div class="space-y-4 text-xs">
+        <div class="p-4 bg-blue-50/70 border border-blue-200 rounded-2xl">
+          <div class="flex justify-between items-center mb-1">
+            <span class="font-bold text-blue-900 text-sm">Zone 2 Monsoon Stormwater Drain Desilting</span>
+            <span class="text-[10px] text-slate-400">10-Sep-2026</span>
+          </div>
+          <p class="text-slate-600">PWD and Water Board emergency teams are desilting underground culverts across West High Court Road and Shankar Nagar. Minor lane diversions active between 10 PM and 5 AM.</p>
+        </div>
+
+        <div class="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl">
+          <div class="flex justify-between items-center mb-1">
+            <span class="font-bold text-emerald-900 text-sm">Smart LED Streetlight Modernization</span>
+            <span class="text-[10px] text-slate-400">08-Sep-2026</span>
+          </div>
+          <p class="text-slate-600">Over 320 non-functional high-pressure sodium lamps in Ward 14 (Civil Lines) replaced with energy-efficient IP66 LED luminaires with centralized automated control.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 6: MUNICIPAL OFFICER COMMAND COCKPIT -->
+  <section id="tabSection_admin" class="tab-section hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">NMC Officer Redressal & SLA Cockpit</h2>
+        <p class="text-xs text-slate-500 font-medium">Duty Desk: Er. Rajesh Verma (Executive Engineer, PWD Div II)</p>
+      </div>
+      <button onclick="CivicApp.switchTab('feed')" class="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1">
+        <i class="fa-solid fa-arrow-left"></i> Citizen Portal
+      </button>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div class="gov-card p-4">
+        <span class="text-xs font-semibold text-slate-500">Total Registered</span>
+        <h4 id="statTotal" class="text-2xl font-black text-slate-900 mt-1">0</h4>
+        <span class="text-[10px] text-blue-700 font-bold">Live across all wards</span>
+      </div>
+
+      <div class="gov-card p-4">
+        <span class="text-xs font-semibold text-slate-500">Critical Hazards</span>
+        <h4 id="statCritical" class="text-2xl font-black text-red-600 mt-1">0</h4>
+        <span class="text-[10px] text-red-600 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> Immediate SLA</span>
+      </div>
+
+      <div class="gov-card p-4">
+        <span class="text-xs font-semibold text-slate-500">Work In Progress</span>
+        <h4 id="statInProgress" class="text-2xl font-black text-amber-600 mt-1">0</h4>
+        <span class="text-[10px] text-amber-700 font-bold">Crews on-site</span>
+      </div>
+
+      <div class="gov-card p-4">
+        <span class="text-xs font-semibold text-slate-500">Resolved & Closed</span>
+        <h4 id="statResolved" class="text-2xl font-black text-emerald-600 mt-1">0</h4>
+        <span class="text-[10px] text-emerald-700 font-bold">Verified repairs</span>
+      </div>
+
+      <div class="gov-card p-4 col-span-2 md:col-span-1">
+        <span class="text-xs font-semibold text-slate-500">Avg Resolution SLA</span>
+        <h4 id="statAvgSLA" class="text-2xl font-black text-purple-700 mt-1">19.5h</h4>
+        <span class="text-[10px] text-purple-700 font-bold">Target: &lt; 24h</span>
+      </div>
+    </div>
+
+    <!-- Charts & Workload -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
+      <div class="md:col-span-5 gov-card p-5 flex flex-col">
+        <h3 class="font-bold text-slate-900 text-sm mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-chart-pie text-blue-700"></i> Issues Breakdown by Category
+        </h3>
+        <div class="relative flex-1 min-h-[220px]">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+
+      <div class="md:col-span-7 gov-card p-5">
+        <h3 class="font-bold text-slate-900 text-sm mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-sitemap text-blue-700"></i> Department Workload & Redressal Rate
+        </h3>
+        <div id="departmentWorkloadList" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- Active Tickets Dispatch Table -->
+    <div class="gov-card p-5 overflow-hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+          <i class="fa-solid fa-list-check text-blue-700"></i> Municipal Work Order Dispatch
+        </h3>
+        <span class="text-xs text-slate-500">Select dropdown to transition status</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase font-bold">
+              <th class="py-3 px-4">Ticket ID</th>
+              <th class="py-3 px-4">Hazard Description</th>
+              <th class="py-3 px-4">Ward</th>
+              <th class="py-3 px-4">Priority</th>
+              <th class="py-3 px-4">Status Action</th>
+              <th class="py-3 px-4">Department</th>
+              <th class="py-3 px-4">Inspect</th>
+            </tr>
+          </thead>
+          <tbody id="adminDispatchTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- TICKET DETAIL & TIMELINE MODAL -->
+  <div id="detailModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div id="detailModalContent" class="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- PRINTABLE ACKNOWLEDGEMENT SLIP MODAL -->
+  <div id="receiptModal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div id="receiptContent"></div>
+    </div>
+  </div>
+
+  <!-- Official Govt Footer -->
+  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 mt-auto py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs pb-6 border-b border-slate-800">
+        <div>
+          <h4 class="text-white font-bold text-sm mb-2">CivicEye Nagpur</h4>
+          <p class="leading-relaxed">Nagpur Municipal Corporation (NMC) & NSSCDCL Smart City Citizen Redressal Portal. Powered by Automated AI Hazard Triage.</p>
+        </div>
+        <div>
+          <h4 class="text-white font-bold text-sm mb-2">Key Municipal Departments</h4>
+          <ul class="space-y-1">
+            <li>• Public Works & Roads Division (PWD)</li>
+            <li>• Solid Waste Management & Sanitation</li>
+            <li>• Streetlight & Electrical Engineering</li>
+            <li>• Water Supply & Drainage Board</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-bold text-sm mb-2">Citizen Assistance</h4>
+          <p>Toll Free Helpline: 1800-233-3764</p>
+          <p>Email: redressal@nagpurciviceye.gov.in</p>
+          <p class="mt-2 text-slate-300">Project by <strong>Kaveri Jadhao</strong></p>
+        </div>
+      </div>
+      <div class="pt-4 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500">
+        <span>© 2026 CivicEye-AI • All Rights Reserved</span>
+        <span>Empowering Citizens • Accelerating Urban Governance</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
