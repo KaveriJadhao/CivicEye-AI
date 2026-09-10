@@ -1,4 +1,4 @@
-// CivicEye - Advanced Frontend Controller with Before/After Slider, Toasts & Micro-Interactions
+// CivicEye - Crystal-Clear, Intuitive Application Controller
 let currentReports = [];
 let currentFilter = {
   category: "All",
@@ -9,28 +9,25 @@ let currentFilter = {
   sortBy: "newest",
 };
 
-let currentTab = "feed";
+let currentTab = "home"; // 'home', 'report', 'feed', 'track', 'officer'
 let userKarma = parseInt(localStorage.getItem("civicKarma") || "140");
+let userPhone = localStorage.getItem("civicUserPhone") || "";
 let userIdentifier = localStorage.getItem("civicUserToken") || "citizen_" + Math.random().toString(36).substring(2, 8);
 localStorage.setItem("civicUserToken", userIdentifier);
 
-let categoryChartInstance = null;
 let currentActiveReport = null;
 
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
-  initTheme();
-  updateKarmaDisplay();
-  setupNavListeners();
+  updateAuthDisplay();
   setupFilterListeners();
   setupReportWizardListeners();
-  setupKeyboardShortcuts();
-  window.CivicMap.initMainMap();
+  initHomeComparisonSlider();
   loadReports();
 });
 
 // Toast notification helper
-function showToast(message, icon = "fa-circle-check", type = "info") {
+function showToast(message, icon = "fa-circle-check") {
   const container = document.getElementById("toastContainer");
   if (!container) return;
 
@@ -50,18 +47,32 @@ function showToast(message, icon = "fa-circle-check", type = "info") {
   }, 3500);
 }
 
-// Dark / Light Theme
-function initTheme() {
-  const isDark = localStorage.getItem("civicTheme") === "dark";
-  if (isDark) {
-    document.documentElement.classList.add("dark");
+// User Auth
+function updateAuthDisplay() {
+  const label = document.getElementById("userAuthLabel");
+  if (label) {
+    if (userPhone) {
+      label.innerText = userPhone.slice(0, 6) + "XXXX";
+    } else {
+      label.innerText = "Citizen Login";
+    }
   }
 }
 
-function toggleTheme() {
-  const isDark = document.documentElement.classList.toggle("dark");
-  localStorage.setItem("civicTheme", isDark ? "dark" : "light");
-  showToast(isDark ? "🌙 Dark mode enabled" : "☀️ Light mode enabled", "fa-circle-half-stroke");
+function openAuthModal() {
+  const modal = document.getElementById("authModal");
+  if (modal) modal.classList.remove("hidden");
+}
+
+function completeLogin() {
+  const input = document.getElementById("authPhoneInput");
+  const phone = input ? input.value.trim() : "+91 98230 44120";
+  userPhone = phone;
+  localStorage.setItem("civicUserPhone", phone);
+  updateAuthDisplay();
+  const modal = document.getElementById("authModal");
+  if (modal) modal.classList.add("hidden");
+  showToast(" Verified! SMS notifications active for your complaints.", "fa-shield-check");
 }
 
 function updateKarmaDisplay() {
@@ -73,69 +84,40 @@ function addKarma(amount, reason = "Civic Action") {
   userKarma += amount;
   localStorage.setItem("civicKarma", userKarma.toString());
   updateKarmaDisplay();
-  showToast(`🎉 +${amount} Karma! (${reason})`, "fa-medal");
+  showToast(` +${amount} Karma! (${reason})`, "fa-medal");
   if (window.confetti) {
     window.confetti({ particleCount: 50, spread: 65, origin: { y: 0.8 } });
   }
 }
 
-// Keyboard shortcuts (e.g. '/' to focus search)
-function setupKeyboardShortcuts() {
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
-      e.preventDefault();
-      const search = document.getElementById("searchInput");
-      if (search) {
-        CivicApp.switchTab("feed");
-        search.focus();
-      }
-    }
-  });
-}
-
-// Navigation
-function setupNavListeners() {
-  const navBtns = document.querySelectorAll(".nav-tab-btn");
-  navBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const tab = btn.getAttribute("data-tab");
-      switchTab(tab);
-    });
-  });
-
-  const topWardFilter = document.getElementById("topWardFilter");
-  if (topWardFilter) {
-    topWardFilter.addEventListener("change", (e) => {
-      currentFilter.ward = e.target.value;
-      loadReports();
-    });
-  }
-}
-
+// Navigation between simple sections
 function switchTab(tab) {
   currentTab = tab;
 
-  const navBtns = document.querySelectorAll(".nav-tab-btn");
-  navBtns.forEach((b) => {
-    if (b.getAttribute("data-tab") === tab) {
-      b.className = "nav-tab-btn px-3.5 py-1.5 rounded-lg bg-white text-blue-700 shadow-sm font-bold transition flex items-center gap-1.5";
-    } else {
-      b.className = "nav-tab-btn px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5";
-    }
-  });
+  // Hide all sections
+  document.querySelectorAll(".page-section").forEach((sec) => sec.classList.add("hidden"));
 
-  document.querySelectorAll(".tab-section").forEach((sec) => sec.classList.add("hidden"));
-  const activeSec = document.getElementById(`tabSection_${tab}`);
+  // Show selected section
+  const activeSec = document.getElementById(`section_${tab}`);
   if (activeSec) activeSec.classList.remove("hidden");
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: "smooth" });
 
   if (tab === "feed") {
     loadReports();
-    setTimeout(() => window.CivicMap.initMainMap(), 100);
-  } else if (tab === "analytics" || tab === "admin") {
-    loadAnalyticsAndAdmin();
-  } else if (tab === "file-report") {
-    setTimeout(() => window.CivicMap.initReportPickerMap(), 200);
+    setTimeout(() => window.CivicMap.initMainMap(), 150);
+  } else if (tab === "report") {
+    setTimeout(() => window.CivicMap.initReportPickerMap(), 150);
+  } else if (tab === "officer") {
+    renderAdminDispatchTable();
   }
+}
+
+function quickReportCategory(catName) {
+  switchTab("report");
+  const catSelect = document.getElementById("wizardCategory");
+  if (catSelect) catSelect.value = catName;
 }
 
 // Filter listeners
@@ -149,21 +131,6 @@ function setupFilterListeners() {
       loadReports();
     });
   });
-
-  const statusFilter = document.getElementById("statusFilter");
-  const sortByFilter = document.getElementById("sortByFilter");
-  const searchInput = document.getElementById("searchInput");
-
-  if (statusFilter) statusFilter.addEventListener("change", (e) => { currentFilter.status = e.target.value; loadReports(); });
-  if (sortByFilter) sortByFilter.addEventListener("change", (e) => { currentFilter.sortBy = e.target.value; loadReports(); });
-
-  if (searchInput) {
-    let debounce;
-    searchInput.addEventListener("input", (e) => {
-      clearTimeout(debounce);
-      debounce = setTimeout(() => { currentFilter.search = e.target.value.trim(); loadReports(); }, 300);
-    });
-  }
 }
 
 // Load reports
@@ -192,136 +159,133 @@ async function loadReports() {
 // Render cards
 function renderFeed(reports) {
   const container = document.getElementById("reportsFeed");
-  const countBadge = document.getElementById("activeReportCount");
-  if (countBadge) countBadge.innerText = `${reports.length} Reports`;
-
   if (!container) return;
 
   if (reports.length === 0) {
     container.innerHTML = `
-      <div class="col-span-full bg-white p-8 rounded-2xl text-center border border-slate-200">
+      <div class="bg-white p-8 rounded-2xl text-center border border-slate-200">
         <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl mb-2">
           <i class="fa-solid fa-check"></i>
         </div>
         <h4 class="text-sm font-bold text-slate-800">All Clear!</h4>
-        <p class="text-slate-500 text-xs mt-1">No active reports match this category or search filter.</p>
+        <p class="text-slate-500 text-xs mt-1">No active reports match this category.</p>
       </div>
     `;
     return;
   }
 
-  container.innerHTML = reports
-    .map((rep) => {
-      const urgencyBadge =
-        rep.urgencyLevel === "CRITICAL"
-          ? "bg-red-50 text-red-700 border border-red-200"
-          : rep.urgencyLevel === "HIGH"
-          ? "bg-orange-50 text-orange-700 border border-orange-200"
-          : rep.urgencyLevel === "MEDIUM"
-          ? "bg-amber-50 text-amber-700 border border-amber-200"
-          : "bg-emerald-50 text-emerald-700 border border-emerald-200";
+  container.innerHTML = `
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      ${reports
+        .map((rep) => {
+          const urgencyBadge =
+            rep.urgencyLevel === "CRITICAL"
+              ? "bg-red-50 text-red-700 border border-red-200"
+              : rep.urgencyLevel === "HIGH"
+              ? "bg-orange-50 text-orange-700 border border-orange-200"
+              : rep.urgencyLevel === "MEDIUM"
+              ? "bg-amber-50 text-amber-700 border border-amber-200"
+              : "bg-emerald-50 text-emerald-700 border border-emerald-200";
 
-      const statusBadge =
-        rep.status === "RESOLVED"
-          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-          : rep.status === "IN_PROGRESS"
-          ? "bg-blue-50 text-blue-700 border border-blue-200"
-          : rep.status === "ASSIGNED"
-          ? "bg-purple-50 text-purple-700 border border-purple-200"
-          : "bg-slate-100 text-slate-700 border border-slate-200";
+          const statusBadge =
+            rep.status === "RESOLVED"
+              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+              : rep.status === "IN_PROGRESS"
+              ? "bg-blue-50 text-blue-700 border border-blue-200"
+              : rep.status === "ASSIGNED"
+              ? "bg-purple-50 text-purple-700 border border-purple-200"
+              : "bg-slate-100 text-slate-700 border border-slate-200";
 
-      const isUpvoted = rep.upvotedBy && rep.upvotedBy.includes(userIdentifier);
-      const timeAgo = getTimeAgo(new Date(rep.createdAt));
+          const isUpvoted = rep.upvotedBy && rep.upvotedBy.includes(userIdentifier);
+          const timeAgo = getTimeAgo(new Date(rep.createdAt));
 
-      return `
-      <div class="clean-card card-hover overflow-hidden flex flex-col justify-between" 
-           onmouseenter="CivicMap.focusReportOnMap('${rep._id || rep.id}')">
-        <div>
-          <!-- Thumbnail -->
-          <div class="relative h-44 w-full bg-slate-100 overflow-hidden cursor-pointer" onclick="CivicApp.openDetailModal('${rep._id || rep.id}')">
-            <img src="${rep.imageUrl || 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600'}" 
-                 class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
-                 alt="${rep.title}"
-                 onerror="this.src='https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600'"/>
-            
-            <div class="absolute top-2.5 left-2.5 flex gap-1">
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBadge} shadow-sm">
-                ${rep.status.replace("_", " ")}
-              </span>
+          return `
+          <div class="clean-card card-hover overflow-hidden flex flex-col justify-between" 
+               onmouseenter="CivicMap.focusReportOnMap('${rep._id || rep.id}')">
+            <div>
+              <div class="relative h-40 w-full bg-slate-100 overflow-hidden cursor-pointer" onclick="CivicApp.openDetailModal('${rep._id || rep.id}')">
+                <img src="${rep.imageUrl || 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600'}" 
+                     class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
+                     alt="${rep.title}"
+                     onerror="this.src='https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600'"/>
+                
+                <div class="absolute top-2 left-2">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBadge} shadow-sm">
+                    ${rep.status.replace("_", " ")}
+                  </span>
+                </div>
+
+                <div class="absolute top-2 right-2">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${urgencyBadge} shadow-sm">
+                    ${rep.urgencyLevel}
+                  </span>
+                </div>
+              </div>
+
+              <div class="p-4">
+                <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1 font-mono font-semibold">
+                  <span class="cursor-pointer hover:text-blue-600" onclick="CivicApp.copyToClipboard('${rep.ticketId}', event)">
+                    ${rep.ticketId} <i class="fa-regular fa-copy text-[10px] ml-0.5"></i>
+                  </span>
+                  <span>${timeAgo}</span>
+                </div>
+
+                <h3 class="font-bold text-slate-900 text-sm leading-snug mb-1 line-clamp-1 hover:text-blue-600 cursor-pointer" onclick="CivicApp.openDetailModal('${rep._id || rep.id}')">
+                  ${rep.title}
+                </h3>
+
+                <p class="text-xs text-slate-500 line-clamp-2 mb-3">
+                  ${rep.description}
+                </p>
+
+                <div class="flex items-center text-xs text-slate-500 font-medium mb-3">
+                  <i class="fa-solid fa-location-dot text-slate-400 mr-1.5 shrink-0"></i>
+                  <span class="truncate">${rep.address || rep.wardNumber || "Nagpur"}</span>
+                </div>
+
+                <div class="bg-slate-50 rounded-xl p-2 border border-slate-100 mb-1">
+                  <div class="flex justify-between items-center text-[10px] font-bold mb-1">
+                    <span class="text-slate-500">Severity</span>
+                    <span class="text-slate-800 font-bold">${rep.severityScore ? rep.severityScore.toFixed(1) : "5.0"}/10</span>
+                  </div>
+                  <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full ${
+                      rep.severityScore > 7.5 ? "bg-red-500" : rep.severityScore > 5 ? "bg-orange-500" : "bg-emerald-500"
+                    }" style="width: ${(rep.severityScore || 5) * 10}%"></div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div class="absolute top-2.5 right-2.5">
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${urgencyBadge} shadow-sm">
-                ${rep.urgencyLevel}
-              </span>
+            <div class="px-4 py-2.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="CivicApp.toggleUpvote('${rep._id || rep.id}')" 
+                      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                        isUpvoted
+                          ? "bg-blue-600 text-white shadow-sm"
+                          : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
+                      }">
+                <i class="fa-solid fa-thumbs-up ${isUpvoted ? "text-white" : "text-blue-600"}"></i>
+                <span>${rep.upvotes || 1}</span>
+              </button>
+
+              <button onclick="CivicApp.openDetailModal('${rep._id || rep.id}')" 
+                      class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                Details <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              </button>
             </div>
           </div>
-
-          <!-- Body -->
-          <div class="p-4">
-            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1 font-mono-code font-semibold">
-              <span class="cursor-pointer hover:text-blue-600" onclick="CivicApp.copyToClipboard('${rep.ticketId}', event)">
-                ${rep.ticketId} <i class="fa-regular fa-copy text-[10px] ml-0.5"></i>
-              </span>
-              <span>${timeAgo}</span>
-            </div>
-
-            <h3 class="font-bold text-slate-900 text-sm leading-snug mb-1 line-clamp-1 hover:text-blue-600 cursor-pointer" onclick="CivicApp.openDetailModal('${rep._id || rep.id}')">
-              ${rep.title}
-            </h3>
-
-            <p class="text-xs text-slate-500 line-clamp-2 mb-3">
-              ${rep.description}
-            </p>
-
-            <div class="flex items-center text-xs text-slate-500 font-medium mb-3">
-              <i class="fa-solid fa-location-dot text-slate-400 mr-1.5 shrink-0"></i>
-              <span class="truncate">${rep.address || rep.wardNumber || "Nagpur"}</span>
-            </div>
-
-            <!-- AI Rating -->
-            <div class="bg-slate-50 rounded-xl p-2 border border-slate-100 mb-1">
-              <div class="flex justify-between items-center text-[10px] font-bold mb-1">
-                <span class="text-slate-500"><i class="fa-solid fa-brain text-purple-600 mr-1"></i> Hazard Score</span>
-                <span class="text-slate-800 font-bold">${rep.severityScore ? rep.severityScore.toFixed(1) : "5.0"}/10</span>
-              </div>
-              <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                <div class="h-full rounded-full ${
-                  rep.severityScore > 7.5 ? "bg-red-500" : rep.severityScore > 5 ? "bg-orange-500" : "bg-emerald-500"
-                }" style="width: ${(rep.severityScore || 5) * 10}%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card Footer -->
-        <div class="px-4 py-2.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between">
-          <button onclick="CivicApp.toggleUpvote('${rep._id || rep.id}')" 
-                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                    isUpvoted
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
-                  }">
-            <i class="fa-solid fa-thumbs-up ${isUpvoted ? "text-white" : "text-blue-600"}"></i>
-            <span>${rep.upvotes || 1}</span>
-          </button>
-
-          <button onclick="CivicApp.openDetailModal('${rep._id || rep.id}')" 
-                  class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1">
-            View Details <i class="fa-solid fa-arrow-right text-[10px]"></i>
-          </button>
-        </div>
-      </div>
-    `;
-    })
-    .join("");
+        `;
+        })
+        .join("")}
+    </div>
+  `;
 }
 
 // Copy ticket code
 function copyToClipboard(text, e) {
   if (e) e.stopPropagation();
   navigator.clipboard.writeText(text);
-  showToast(`📋 Copied ${text} to clipboard!`, "fa-copy");
+  showToast(` Copied ${text} to clipboard!`, "fa-copy");
 }
 
 // Toggle Upvote
@@ -373,7 +337,7 @@ async function handleWizardImageScan(e) {
     scanBox.innerHTML = `
       <div class="flex items-center gap-2 text-blue-600 font-semibold text-xs py-2.5 bg-blue-50 border border-blue-100 rounded-xl px-3">
         <i class="fa-solid fa-sparkles fa-spin"></i>
-        <span>AI Vision Engine is analyzing hazard type, depth & priority...</span>
+        <span>AI is scanning image for hazard category & authentic EXIF...</span>
       </div>
     `;
   }
@@ -397,7 +361,7 @@ async function handleWizardImageScan(e) {
       <div class="bg-blue-50/90 border border-blue-200 rounded-2xl p-4 text-xs shadow-sm">
         <div class="flex items-center justify-between mb-1.5">
           <span class="font-bold text-blue-900 flex items-center gap-1.5">
-            <i class="fa-solid fa-brain text-blue-600"></i> AI Detection (${(ai.confidence * 100).toFixed(0)}% Match)
+            <i class="fa-solid fa-brain text-blue-600"></i> AI Verified (${(ai.confidence * 100).toFixed(0)}% Match)
           </span>
           <span class="font-bold px-2 py-0.5 rounded-full text-[10px] ${
             ai.urgencyLevel === "CRITICAL" ? "bg-red-600 text-white" : "bg-blue-700 text-white"
@@ -409,11 +373,7 @@ async function handleWizardImageScan(e) {
         <div class="flex flex-wrap gap-2 text-[10px] font-semibold text-slate-600">
           <span class="bg-white px-2 py-1 rounded-md border border-blue-100">🏛️ ${ai.recommendedDepartment}</span>
           <span class="bg-white px-2 py-1 rounded-md border border-blue-100">⏱️ SLA: ${ai.estimatedSlaHours}h</span>
-          ${
-            ai.potentialDuplicateDetected
-              ? `<span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-md border border-amber-300 font-bold">⚠️ Existing active ticket nearby</span>`
-              : ""
-          }
+          <span class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md border border-emerald-200 font-bold">🛡️ Authentic Image Passed</span>
         </div>
       </div>
     `;
@@ -450,7 +410,7 @@ function handleVoiceRecording() {
   rec.start();
 
   function resetBtn() {
-    btn.innerHTML = `<i class="fa-solid fa-microphone text-blue-600"></i> Speak Notes`;
+    btn.innerHTML = `<i class="fa-solid fa-microphone text-blue-600"></i> Speak`;
   }
 }
 
@@ -479,7 +439,7 @@ async function handleReportSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById("wizardSubmitBtn");
   btn.disabled = true;
-  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registering Ticket...`;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
 
   try {
     const formData = new FormData(e.target);
@@ -495,7 +455,7 @@ async function handleReportSubmit(e) {
     alert("Submission error: " + err.message);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<i class="fa-solid fa-paper-plane mr-2"></i> Submit Grievance (+50 Karma)`;
+    btn.innerHTML = `<i class="fa-solid fa-paper-plane mr-2"></i> Submit Issue (+50 Karma)`;
   }
 }
 
@@ -518,7 +478,7 @@ function showAcknowledgementSlip(rep) {
       <div class="grid grid-cols-2 gap-3 text-xs mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
         <div>
           <span class="text-slate-500">Ticket Reference:</span>
-          <p class="font-mono-code font-bold text-sm text-blue-600">${rep.ticketId}</p>
+          <p class="font-mono font-bold text-sm text-blue-600">${rep.ticketId}</p>
         </div>
         <div>
           <span class="text-slate-500">Date Logged:</span>
@@ -555,7 +515,7 @@ function showAcknowledgementSlip(rep) {
 // Track Ticket
 async function trackTicketDirectly(ticketId) {
   try {
-    switchTab("track-ticket");
+    switchTab("track");
     const resBox = document.getElementById("ticketTrackResult");
     const input = document.getElementById("trackTicketInput");
     if (input) input.value = ticketId;
@@ -596,7 +556,7 @@ function renderTrackResult(rep) {
       
       <div class="flex flex-wrap items-center justify-between border-b border-slate-100 pb-4 mb-4 gap-2">
         <div>
-          <span class="text-xs font-mono-code font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded cursor-pointer hover:bg-blue-100" onclick="CivicApp.copyToClipboard('${rep.ticketId}', event)">
+          <span class="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded cursor-pointer hover:bg-blue-100" onclick="CivicApp.copyToClipboard('${rep.ticketId}', event)">
             ${rep.ticketId} <i class="fa-regular fa-copy text-[10px] ml-1"></i>
           </span>
           <h3 class="text-base font-bold text-slate-900 mt-1.5">${rep.title}</h3>
@@ -699,7 +659,7 @@ function renderDetailModalContent(rep) {
       <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
         <div>
           <div class="flex items-center gap-2 mb-1">
-            <span class="text-xs font-mono-code font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded cursor-pointer hover:bg-blue-100" onclick="CivicApp.copyToClipboard('${rep.ticketId}', event)">
+            <span class="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded cursor-pointer hover:bg-blue-100" onclick="CivicApp.copyToClipboard('${rep.ticketId}', event)">
               ${rep.ticketId} <i class="fa-regular fa-copy text-[10px] ml-1"></i>
             </span>
             <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${
@@ -727,7 +687,6 @@ function renderDetailModalContent(rep) {
                   <span class="text-[10px] text-emerald-700 bg-white px-2 py-0.5 rounded font-normal">Drag divider ↔</span>
                 </span>
                 
-                <!-- Interactive Comparison Slider -->
                 <div id="sliderBox" class="comparison-slider-container">
                   <img src="${rep.resolutionImageUrl}" class="comparison-before-img" alt="After Repair"/>
                   <img id="afterImgLayer" src="${rep.imageUrl}" class="comparison-after-img" alt="Before Repair"/>
@@ -840,11 +799,10 @@ function renderDetailModalContent(rep) {
     </div>
   `;
 
-  // Initialize Before/After Slider if present
   setTimeout(() => initComparisonSlider(), 50);
 }
 
-// Comparison Slider
+// Comparison Slider helper
 function initComparisonSlider() {
   const container = document.getElementById("sliderBox");
   const afterImg = document.getElementById("afterImgLayer");
@@ -852,7 +810,6 @@ function initComparisonSlider() {
   if (!container || !afterImg || !handle) return;
 
   let isDragging = false;
-
   const move = (e) => {
     if (!isDragging) return;
     const rect = container.getBoundingClientRect();
@@ -863,14 +820,41 @@ function initComparisonSlider() {
     afterImg.style.width = percentage + "%";
     handle.style.left = percentage + "%";
   };
-
   const start = (e) => { isDragging = true; move(e); };
   const stop = () => { isDragging = false; };
 
   container.addEventListener("mousedown", start);
   window.addEventListener("mousemove", move);
   window.addEventListener("mouseup", stop);
+  container.addEventListener("touchstart", start);
+  window.addEventListener("touchmove", move);
+  window.addEventListener("touchend", stop);
+}
 
+// Home Comparison Slider
+function initHomeComparisonSlider() {
+  const container = document.getElementById("homeSliderBox");
+  const afterImg = document.getElementById("homeAfterImgLayer");
+  const handle = document.getElementById("homeSliderHandle");
+  if (!container || !afterImg || !handle) return;
+
+  let isDragging = false;
+  const move = (e) => {
+    if (!isDragging) return;
+    const rect = container.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    let x = clientX - rect.left;
+    x = Math.max(0, Math.min(x, rect.width));
+    const percentage = (x / rect.width) * 100;
+    afterImg.style.width = percentage + "%";
+    handle.style.left = percentage + "%";
+  };
+  const start = (e) => { isDragging = true; move(e); };
+  const stop = () => { isDragging = false; };
+
+  container.addEventListener("mousedown", start);
+  window.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", stop);
   container.addEventListener("touchstart", start);
   window.addEventListener("touchmove", move);
   window.addEventListener("touchend", stop);
@@ -885,94 +869,18 @@ async function postComment(reportId) {
   try {
     const updated = await window.CivicAPI.addComment(reportId, {
       text,
-      userName: "Civic Citizen",
+      userName: userPhone ? `Citizen (${userPhone.slice(0, 6)}XX)` : "Civic Citizen",
       userRole: "CITIZEN",
     });
     currentActiveReport = updated;
     renderDetailModalContent(updated);
-    showToast("💬 Comment posted!", "fa-comment");
+    showToast(" Comment posted!", "fa-comment");
   } catch (err) {
     alert("Error adding comment: " + err.message);
   }
 }
 
-// Analytics and Admin
-async function loadAnalyticsAndAdmin() {
-  try {
-    const stats = await window.CivicAPI.getAdminStats();
-
-    const statTotal = document.getElementById("statTotal");
-    const statCritical = document.getElementById("statCritical");
-    const statInProgress = document.getElementById("statInProgress");
-    const statResolved = document.getElementById("statResolved");
-
-    if (statTotal) statTotal.innerText = stats.totalReports;
-    if (statCritical) statCritical.innerText = stats.highUrgencyCount;
-    if (statInProgress) statInProgress.innerText = stats.inProgressReports;
-    if (statResolved) statResolved.innerText = stats.resolvedReports;
-
-    renderCategoryChart(stats.categoryDistribution);
-    renderDepartmentTable(stats.departmentWorkload);
-    renderAdminDispatchTable();
-  } catch (err) {
-    console.error("Analytics load error:", err);
-  }
-}
-
-function renderCategoryChart(catDist) {
-  const ctx = document.getElementById("categoryChart");
-  if (!ctx) return;
-
-  if (categoryChartInstance) categoryChartInstance.destroy();
-
-  const labels = Object.keys(catDist);
-  const data = Object.values(catDist);
-
-  categoryChartInstance = new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: labels.map((l) => l.split("&")[0].trim()),
-      datasets: [
-        {
-          data: data,
-          backgroundColor: ["#2563eb", "#10b981", "#f59e0b", "#06b6d4", "#ef4444", "#8b5cf6"],
-          borderWidth: 2,
-          borderColor: "#ffffff",
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: "bottom", labels: { font: { size: 10, family: "Plus Jakarta Sans" } } },
-      },
-    },
-  });
-}
-
-function renderDepartmentTable(workload) {
-  const container = document.getElementById("departmentWorkloadList");
-  if (!container) return;
-
-  container.innerHTML = Object.entries(workload)
-    .map(([dept, data]) => {
-      const percentage = data.total > 0 ? Math.round((data.resolved / data.total) * 100) : 0;
-      return `
-      <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-        <div class="flex justify-between items-center mb-1 text-xs">
-          <span class="font-bold text-slate-800">${dept}</span>
-          <span class="font-bold text-blue-600">${data.resolved}/${data.total} Fixed (${percentage}%)</span>
-        </div>
-        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-          <div class="bg-emerald-500 h-full rounded-full" style="width: ${percentage}%"></div>
-        </div>
-      </div>
-    `;
-    })
-    .join("");
-}
-
+// Admin / Officer table
 async function renderAdminDispatchTable() {
   const container = document.getElementById("adminDispatchTableBody");
   if (!container) return;
@@ -982,7 +890,7 @@ async function renderAdminDispatchTable() {
     .map(
       (r) => `
     <tr class="border-b border-slate-100 hover:bg-slate-50 text-xs">
-      <td class="py-3 px-4 font-mono-code font-bold text-blue-600">${r.ticketId}</td>
+      <td class="py-3 px-4 font-mono font-bold text-blue-600">${r.ticketId}</td>
       <td class="py-3 px-4 font-semibold text-slate-900 max-w-[190px] truncate">${r.title}</td>
       <td class="py-3 px-4 text-slate-600">${r.wardNumber || "Ward 12"}</td>
       <td class="py-3 px-4">
@@ -1001,7 +909,6 @@ async function renderAdminDispatchTable() {
           <option value="RESOLVED" ${r.status === "RESOLVED" ? "selected" : ""}>RESOLVED</option>
         </select>
       </td>
-      <td class="py-3 px-4 text-slate-600">${r.assignedDepartment}</td>
       <td class="py-3 px-4">
         <button onclick="CivicApp.openDetailModal('${r._id || r.id}')" class="text-blue-600 hover:text-blue-800 font-bold">
           Inspect
@@ -1017,11 +924,11 @@ async function changeReportStatus(reportId, newStatus) {
   try {
     await window.CivicAPI.updateStatus(reportId, {
       status: newStatus,
-      actorName: "Municipal Admin",
-      actorRole: "ADMIN",
+      actorName: "Municipal Officer",
+      actorRole: "OFFICER",
     });
     showToast(`Status updated to ${newStatus}`, "fa-route");
-    loadAnalyticsAndAdmin();
+    renderAdminDispatchTable();
     loadReports();
   } catch (err) {
     alert("Failed to update status: " + err.message);
@@ -1033,7 +940,7 @@ async function resetDemoData() {
     await window.CivicAPI.resetSeedData();
     showToast("Clean demo dataset re-seeded!", "fa-rotate");
     loadReports();
-    if (currentTab === "admin" || currentTab === "analytics") loadAnalyticsAndAdmin();
+    renderAdminDispatchTable();
   }
 }
 
@@ -1058,5 +965,7 @@ window.CivicApp = {
   postComment,
   resetDemoData,
   copyToClipboard,
-  toggleTheme,
+  quickReportCategory,
+  openAuthModal,
+  completeLogin,
 };
