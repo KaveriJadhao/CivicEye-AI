@@ -124,47 +124,34 @@ function initHomeComparisonSlider() {
   });
 }
 
-// FAQ Accordion Toggle
-function toggleFaq(button) {
-  const faqItem = button.closest(".faq-item");
-  if (!faqItem) return;
-  const answer = faqItem.querySelector(".faq-answer");
-  const icon = button.querySelector(".faq-icon");
-  const isOpen = answer && !answer.classList.contains("hidden");
+// Clean Top Tab Navigation
+function switchTab(tabName) {
+  currentTab = tabName;
 
-  // Close all FAQs
-  document.querySelectorAll(".faq-item .faq-answer").forEach((el) => el.classList.add("hidden"));
-  document.querySelectorAll(".faq-item .faq-icon").forEach((el) => el.classList.remove("rotate-180"));
-
-  // Toggle clicked
-  if (answer && !isOpen) {
-    answer.classList.remove("hidden");
-    if (icon) icon.classList.add("rotate-180");
-  }
-}
-
-// Cockpit Tab Switcher
-function switchCockpitTab(tabName) {
-  // Update Tab Buttons
-  document.querySelectorAll(".cockpit-tab-btn").forEach((btn) => {
-    btn.classList.remove("bg-blue-600", "text-white", "shadow-sm");
-    btn.classList.add("text-slate-600", "hover:bg-slate-100");
+  // Update nav buttons
+  document.querySelectorAll(".nav-tab-btn").forEach((btn) => {
+    const isThisTab = btn.getAttribute("data-tab") === tabName;
+    if (isThisTab) {
+      btn.className = "nav-tab-btn px-3 py-2 rounded-xl text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 transition flex items-center gap-1.5 shadow-2xs";
+    } else {
+      btn.className = "nav-tab-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5";
+    }
   });
 
-  const activeBtn = document.getElementById(`cockpitTabBtn_${tabName}`);
-  if (activeBtn) {
-    activeBtn.classList.remove("text-slate-600", "hover:bg-slate-100");
-    activeBtn.classList.add("bg-blue-600", "text-white", "shadow-sm");
+  // Hide all Tab Panels and show active one
+  document.querySelectorAll(".app-tab-panel").forEach((panel) => {
+    panel.classList.add("hidden");
+  });
+
+  const targetPanel = document.getElementById(`tab_${tabName}`);
+  if (targetPanel) {
+    targetPanel.classList.remove("hidden");
   }
 
-  // Update Tab Panels
-  document.querySelectorAll(".cockpit-panel").forEach((p) => p.classList.add("hidden"));
-  const activePanel = document.getElementById(`cockpitPanel_${tabName}`);
-  if (activePanel) {
-    activePanel.classList.remove("hidden");
-  }
+  // Scroll to top smoothly
+  window.scrollTo({ top: 0, behavior: "smooth" });
 
-  if (tabName === "feed") {
+  if (tabName === "map" || tabName === "feed") {
     loadReports();
     setTimeout(() => {
       if (window.CivicMap && window.CivicMap.initMainMap) {
@@ -179,24 +166,13 @@ function switchCockpitTab(tabName) {
     }, 150);
   } else if (tabName === "officer") {
     renderAdminDispatchTable();
+  } else if (tabName === "karma") {
+    setTimeout(() => initHomeComparisonSlider(), 100);
   }
-}
-
-function scrollToCockpit(tabName = "report") {
-  switchCockpitTab(tabName);
-  const cockpit = document.getElementById("app-cockpit");
-  if (cockpit) {
-    cockpit.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-}
-
-// Legacy / Direct Switch helper
-function switchTab(tab) {
-  scrollToCockpit(tab === "home" ? "feed" : tab);
 }
 
 function quickReportCategory(catName) {
-  scrollToCockpit("report");
+  switchTab("report");
   const catSelect = document.getElementById("wizardCategory");
   if (catSelect) catSelect.value = catName;
 }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CivicEye — Municipal AI Grievance Redressal OS</title>
+  <title>CivicEye — Municipal AI Grievance OS</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -21,793 +21,568 @@
   <!-- Design System -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body class="landing-body">
+<body class="bg-[#F8FAFC] text-slate-900 min-h-screen flex flex-col antialiased">
 
   <!-- ==========================================
-       1. STICKY GLASS NAVBAR
+       TOP APP HEADER & NAVIGATION TABS
        ========================================== -->
-  <div class="landing-navbar-wrapper">
-    <header class="landing-navbar">
-      <a href="index.html" class="landing-brand">
-        <div class="logo-icon">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-2xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-2.5 cursor-pointer shrink-0" onclick="CivicApp.switchTab('overview')">
+        <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-base shadow-sm">
           <i class="fa-solid fa-eye"></i>
         </div>
-        <span>CivicEye</span>
-        <span class="badge-pill">Municipal AI OS</span>
-      </a>
+        <div>
+          <span class="text-base font-extrabold tracking-tight text-slate-900">CivicEye</span>
+          <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded ml-1">Nagpur City</span>
+        </div>
+      </div>
 
-      <ul class="landing-nav-links hidden lg:flex">
-        <li><a href="#how-it-works">How It Works</a></li>
-        <li><a href="#ai-vision">AI Vision</a></li>
-        <li><a href="#live-map">Geospatial Map</a></li>
-        <li><a href="#before-after">Proof of Work</a></li>
-        <li><a href="#civic-karma">Karma & Rewards</a></li>
-        <li><a href="#app-cockpit">Live App Cockpit</a></li>
-        <li><a href="#faq">FAQ</a></li>
-      </ul>
+      <!-- App Tabs Navigation (Desktop) -->
+      <nav class="hidden md:flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1">
+        <button data-tab="overview" onclick="CivicApp.switchTab('overview')" class="nav-tab-btn px-3 py-2 rounded-xl text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 transition flex items-center gap-1.5 shadow-2xs">
+          <i class="fa-solid fa-house"></i>
+          <span>Overview</span>
+        </button>
 
-      <div class="landing-nav-actions flex items-center gap-3">
-        <div id="authStatusBtn" onclick="CivicApp.openAuthModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition flex items-center gap-1.5">
+        <button data-tab="report" onclick="CivicApp.switchTab('report')" class="nav-tab-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-camera text-blue-600"></i>
+          <span>Report Issue</span>
+        </button>
+
+        <button data-tab="map" onclick="CivicApp.switchTab('map')" class="nav-tab-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-map-location-dot text-emerald-600"></i>
+          <span>Live City Map</span>
+        </button>
+
+        <button data-tab="track" onclick="CivicApp.switchTab('track')" class="nav-tab-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-magnifying-glass text-amber-600"></i>
+          <span>Track Complaint</span>
+        </button>
+
+        <button data-tab="karma" onclick="CivicApp.switchTab('karma')" class="nav-tab-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-medal text-purple-600"></i>
+          <span>Proof & Karma</span>
+        </button>
+
+        <button data-tab="officer" onclick="CivicApp.switchTab('officer')" class="nav-tab-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-user-shield text-slate-700"></i>
+          <span>Officer Portal</span>
+        </button>
+      </nav>
+
+      <!-- Right User / Auth Status -->
+      <div class="flex items-center gap-2.5 shrink-0">
+        <div id="authStatusBtn" onclick="CivicApp.openAuthModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition flex items-center gap-1.5">
           <i class="fa-solid fa-user-circle text-blue-600"></i>
           <span id="userAuthLabel">Citizen Login</span>
         </div>
 
-        <button onclick="CivicApp.scrollToCockpit('report')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition">
-          <i class="fa-solid fa-camera"></i>
-          <span>Report Hazard</span>
+        <button onclick="CivicApp.switchTab('report')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition">
+          <i class="fa-solid fa-plus"></i>
+          <span class="hidden sm:inline">Report Hazard</span>
         </button>
       </div>
-    </header>
-  </div>
 
-  <main>
-    <!-- ==========================================
-         2. HERO SECTION WITH LIVE APP MOCKUP
-         ========================================== -->
-    <section class="landing-hero">
-      <div class="landing-hero-left">
-        <div class="hero-tag">
-          <i class="fa-solid fa-sparkles text-amber-500"></i>
-          <span>Smart City Municipal Grievance Redressal OS</span>
+    </div>
+
+    <!-- Mobile Sub-Navigation Bar -->
+    <div class="md:hidden border-t border-slate-200 bg-slate-50 px-3 py-2 flex items-center justify-between gap-1 overflow-x-auto scrollbar-none">
+      <button data-tab="overview" onclick="CivicApp.switchTab('overview')" class="nav-tab-btn px-2.5 py-1.5 rounded-lg text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 shrink-0">
+        Overview
+      </button>
+      <button data-tab="report" onclick="CivicApp.switchTab('report')" class="nav-tab-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 shrink-0">
+        Report
+      </button>
+      <button data-tab="map" onclick="CivicApp.switchTab('map')" class="nav-tab-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 shrink-0">
+        Live Map
+      </button>
+      <button data-tab="track" onclick="CivicApp.switchTab('track')" class="nav-tab-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 shrink-0">
+        Track
+      </button>
+      <button data-tab="karma" onclick="CivicApp.switchTab('karma')" class="nav-tab-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 shrink-0">
+        Proof
+      </button>
+      <button data-tab="officer" onclick="CivicApp.switchTab('officer')" class="nav-tab-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 shrink-0">
+        Officer
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================
+       TAB 1: APP OVERVIEW & QUICK ACTIONS
+       ========================================== -->
+  <main id="tab_overview" class="app-tab-panel flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
+    
+    <!-- Hero Banner Card -->
+    <div class="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 rounded-3xl p-6 sm:p-10 text-white shadow-md mb-8 relative overflow-hidden">
+      <div class="relative z-10 max-w-2xl">
+        <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-xs text-blue-100 text-xs font-bold px-3 py-1 rounded-full mb-3">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Nagpur Smart City Municipal Redressal OS
         </div>
-
-        <h1>
-          Report civic hazards in <span class="highlight-blue">30 seconds.</span> AI fixes your city faster.
+        <h1 class="text-2xl sm:text-4xl font-black tracking-tight leading-tight mb-3">
+          Fix Civic Hazards in 30 Seconds.
         </h1>
-
-        <p class="hero-desc">
-          See a dangerous pothole, overflowing garbage dumpster, or broken streetlight? Snap a photo. CivicEye's multimodal AI vision verifies authentic GPS damage, dispatches field crews with 24-hour SLAs, and lets you track photographic proof of repair live.
+        <p class="text-blue-100 text-xs sm:text-sm leading-relaxed mb-6">
+          Report road craters, overflowing garbage dumpsters, dark streetlights, and clogged drainage. CivicEye's multimodal AI verifies damage severity, pins exact GPS coordinates, and dispatches field crews with transparent 24h SLAs.
         </p>
 
-        <div class="hero-cta-row flex flex-wrap gap-3">
-          <button onclick="CivicApp.scrollToCockpit('report')" class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-md transition flex items-center gap-2">
-            <i class="fa-solid fa-camera"></i>
-            <span>Report Hazard Now</span>
+        <div class="flex flex-wrap items-center gap-3">
+          <button onclick="CivicApp.switchTab('report')" class="bg-white hover:bg-slate-100 text-blue-700 font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm transition flex items-center gap-2">
+            <i class="fa-solid fa-camera"></i> File a Complaint Now
           </button>
-          <button onclick="CivicApp.scrollToCockpit('track')" class="btn bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-bold px-5 py-3 rounded-xl text-sm transition flex items-center gap-2">
-            <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
-            <span>Track by Ticket ID</span>
+          <button onclick="CivicApp.switchTab('map')" class="bg-blue-800/60 hover:bg-blue-800/80 text-white border border-white/20 font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm transition flex items-center gap-2">
+            <i class="fa-solid fa-map-location-dot"></i> View Live City Map
           </button>
-          <button onclick="CivicApp.scrollToCockpit('feed')" class="btn bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-5 py-3 rounded-xl text-sm transition flex items-center gap-2">
-            <i class="fa-solid fa-map-location-dot text-blue-600"></i>
-            <span>Live City Map</span>
+          <button onclick="CivicApp.switchTab('track')" class="bg-blue-800/60 hover:bg-blue-800/80 text-white border border-white/20 font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm transition flex items-center gap-2">
+            <i class="fa-solid fa-magnifying-glass"></i> Track Ticket Status
           </button>
-        </div>
-
-        <div class="hero-trust-badges flex flex-wrap gap-4 text-xs font-semibold text-slate-500 mt-6">
-          <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-check text-emerald-600"></i> AI Anti-Fake Verification</span>
-          <span>•</span>
-          <span class="flex items-center gap-1.5"><i class="fa-solid fa-location-dot text-blue-600"></i> Auto GPS EXIF Tagging</span>
-          <span>•</span>
-          <span class="flex items-center gap-1.5"><i class="fa-solid fa-clock text-purple-600"></i> 24h PWD Resolution SLA</span>
         </div>
       </div>
+    </div>
 
-      <!-- Live Realistic App Mockup Window -->
-      <div class="hero-mockup-window">
-        <div class="mockup-window-header">
-          <div class="mockup-dots">
-            <div class="mockup-dot red"></div>
-            <div class="mockup-dot yellow"></div>
-            <div class="mockup-dot green"></div>
-          </div>
-          <span class="mockup-window-title text-xs font-bold text-slate-700">CivicEye Municipal Cockpit Live</span>
-          <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Online
-          </span>
+    <!-- 4 Core Feature Explanations (What CivicEye Does) -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-extrabold text-slate-900">How CivicEye Works</h2>
+          <p class="text-xs text-slate-500">Core intelligence modules powering instant municipal resolution</p>
         </div>
+        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">4 Intelligent Modules</span>
+      </div>
 
-        <div class="mockup-window-body">
-          <!-- Profile Bar -->
-          <div class="flex justify-between items-center pb-2 border-b border-slate-100">
-            <div class="flex items-center gap-2.5">
-              <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center border border-blue-200">
-                KJ
-              </div>
-              <div>
-                <strong class="text-xs text-slate-900 block font-bold">Kaveri's Ward Zone</strong>
-                <span class="text-[10px] text-slate-400">Dharampeth & Civil Lines (Zone 2)</span>
-              </div>
-            </div>
-            <span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg flex items-center gap-1">
-              <i class="fa-solid fa-medal text-amber-500"></i> 140 Civic Karma
-            </span>
-          </div>
-
-          <!-- KPI Cards -->
-          <div class="grid grid-cols-2 gap-3">
-            <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl border-l-4 border-l-emerald-500">
-              <div class="text-[10px] font-bold text-slate-400 uppercase">24h SLA Compliance</div>
-              <div class="text-base font-extrabold text-emerald-700 mt-0.5">94.8%</div>
-              <div class="w-full bg-slate-200 h-1.5 rounded-full mt-2 overflow-hidden">
-                <div class="bg-emerald-500 h-full w-[94.8%]"></div>
-              </div>
-            </div>
-
-            <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl border-l-4 border-l-blue-600">
-              <div class="text-[10px] font-bold text-slate-400 uppercase">Avg. Turnaround</div>
-              <div class="text-base font-extrabold text-blue-700 mt-0.5">18.4 Hours</div>
-              <span class="text-[10px] text-slate-500">Faster than 48h limit</span>
-            </div>
-          </div>
-
-          <!-- Live AI Detection Preview Banner -->
-          <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 text-sm">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Feature 1 -->
+        <div onclick="CivicApp.switchTab('report')" class="bg-white border border-slate-200 hover:border-blue-500 rounded-2xl p-5 cursor-pointer transition shadow-2xs group">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
               <i class="fa-solid fa-brain"></i>
             </div>
-            <div class="flex-1 min-w-0">
-              <div class="text-[10px] font-extrabold text-blue-700 uppercase tracking-wide">AI Vision Triage Result</div>
-              <div class="text-xs font-bold text-slate-900 truncate">🚧 Severe Pothole (Depth 14cm)</div>
-              <div class="flex items-center gap-1.5 mt-1">
-                <span class="text-[10px] font-bold bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded">Severity: 8.5/10</span>
-                <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">GPS Verified</span>
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="font-bold text-sm text-slate-900">1. Multimodal AI Vision Triage</h3>
+                <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">Auto 1-10 Severity</span>
               </div>
-            </div>
-            <span class="text-[10px] font-bold text-emerald-700 bg-white border border-emerald-300 px-2 py-1 rounded-lg">
-              <i class="fa-solid fa-check"></i> Dispatched
-            </span>
-          </div>
-
-          <!-- Mini Feed -->
-          <div class="space-y-1.5 text-xs">
-            <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-              <div class="flex items-center gap-2">
-                <span class="text-slate-400">💡</span>
-                <span class="font-bold text-slate-800">Streetlight Luminaire Replaced</span>
-              </div>
-              <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Resolved</span>
-            </div>
-            <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
-              <div class="flex items-center gap-2">
-                <span class="text-slate-400">🗑️</span>
-                <span class="font-bold text-slate-800">Commercial Dumpster Cleared</span>
-              </div>
-              <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">In Progress</span>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Scans hazard photos to identify damage category, estimate repair urgency, and verify camera sensor EXIF metadata to block reposted fake images.
+              </p>
             </div>
           </div>
         </div>
+
+        <!-- Feature 2 -->
+        <div onclick="CivicApp.switchTab('map')" class="bg-white border border-slate-200 hover:border-blue-500 rounded-2xl p-5 cursor-pointer transition shadow-2xs group">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+              <i class="fa-solid fa-map-pin"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="font-bold text-sm text-slate-900">2. 80m Spatial Proximity Clustering</h3>
+                <span class="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded">Deduplication</span>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Haversine geospatial clustering groups repetitive neighbor complaints into single consolidated master tickets with community upvote priority.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div onclick="CivicApp.switchTab('officer')" class="bg-white border border-slate-200 hover:border-blue-500 rounded-2xl p-5 cursor-pointer transition shadow-2xs group">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="font-bold text-sm text-slate-900">3. 24-Hour Municipal SLA Routing</h3>
+                <span class="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded">SLA Target</span>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Auto-assigns work orders directly to Nagpur PWD, Sanitation, or Electrical engineers with a strict 24h countdown timer before manager escalation.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div onclick="CivicApp.switchTab('karma')" class="bg-white border border-slate-200 hover:border-blue-500 rounded-2xl p-5 cursor-pointer transition shadow-2xs group">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+              <i class="fa-solid fa-camera-rotate"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="font-bold text-sm text-slate-900">4. Transparent Before/After Proof</h3>
+                <span class="text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded">+50 Karma</span>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Field teams upload post-repair photos for public inspection. Compare the fix with the interactive slider and earn verified citizen Civic Karma.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
 
-    <!-- ==========================================
-         3. STATS STRIP
-         ========================================== -->
-    <section class="stats-strip">
-      <div class="stats-grid">
-        <div class="stat-box">
-          <div class="stat-number">&lt; 30 Sec</div>
-          <div class="stat-label">Instant Multimodal Issue Filing</div>
+    <!-- 4 Stats Strip -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
+      <div class="bg-white border border-slate-200 p-4 rounded-2xl text-center shadow-2xs">
+        <div class="text-xl sm:text-2xl font-black text-blue-600">&lt; 30s</div>
+        <div class="text-[11px] font-bold text-slate-500 mt-0.5">Instant Issue Filing</div>
+      </div>
+      <div class="bg-white border border-slate-200 p-4 rounded-2xl text-center shadow-2xs">
+        <div class="text-xl sm:text-2xl font-black text-emerald-600">94.8%</div>
+        <div class="text-[11px] font-bold text-slate-500 mt-0.5">24h SLA Compliance</div>
+      </div>
+      <div class="bg-white border border-slate-200 p-4 rounded-2xl text-center shadow-2xs">
+        <div class="text-xl sm:text-2xl font-black text-purple-600">80m</div>
+        <div class="text-[11px] font-bold text-slate-500 mt-0.5">Spatial Deduplication</div>
+      </div>
+      <div class="bg-white border border-slate-200 p-4 rounded-2xl text-center shadow-2xs">
+        <div class="text-xl sm:text-2xl font-black text-amber-600">1,250+</div>
+        <div class="text-[11px] font-bold text-slate-500 mt-0.5">City Hazards Resolved</div>
+      </div>
+    </div>
+
+    <!-- Quick Report Categories -->
+    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs">
+      <h3 class="text-center font-bold text-xs uppercase tracking-wider text-slate-400 mb-4">
+        Quick Report by Category
+      </h3>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div onclick="CivicApp.quickReportCategory('Pothole & Road Damage')" class="bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 p-4 rounded-2xl cursor-pointer text-center transition group">
+          <div class="text-3xl mb-1 group-hover:scale-110 transition-transform">🚧</div>
+          <h4 class="font-bold text-xs text-slate-800">Road Potholes</h4>
+          <p class="text-[10px] text-slate-400 mt-0.5">Craters & broken asphalt</p>
         </div>
-        <div class="stat-box">
-          <div class="stat-number">94.8%</div>
-          <div class="stat-label">24-Hour Municipal SLA Compliance</div>
+
+        <div onclick="CivicApp.quickReportCategory('Garbage & Sanitation')" class="bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 p-4 rounded-2xl cursor-pointer text-center transition group">
+          <div class="text-3xl mb-1 group-hover:scale-110 transition-transform">🗑️</div>
+          <h4 class="font-bold text-xs text-slate-800">Garbage & Waste</h4>
+          <p class="text-[10px] text-slate-400 mt-0.5">Overflowing dumpsters</p>
         </div>
-        <div class="stat-box">
-          <div class="stat-number">80m</div>
-          <div class="stat-label">Geospatial Duplicate Deduplication</div>
+
+        <div onclick="CivicApp.quickReportCategory('Streetlight & Electrical')" class="bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 p-4 rounded-2xl cursor-pointer text-center transition group">
+          <div class="text-3xl mb-1 group-hover:scale-110 transition-transform">💡</div>
+          <h4 class="font-bold text-xs text-slate-800">Dark Streetlights</h4>
+          <p class="text-[10px] text-slate-400 mt-0.5">Power cuts & exposed wire</p>
         </div>
-        <div class="stat-box">
-          <div class="stat-number">1,250+</div>
-          <div class="stat-label">Potholes, Dumps & Lights Repaired</div>
+
+        <div onclick="CivicApp.quickReportCategory('Waterlogging & Drainage')" class="bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 p-4 rounded-2xl cursor-pointer text-center transition group">
+          <div class="text-3xl mb-1 group-hover:scale-110 transition-transform">🌊</div>
+          <h4 class="font-bold text-xs text-slate-800">Drainage & Floods</h4>
+          <p class="text-[10px] text-slate-400 mt-0.5">Clogged sewers & leaks</p>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- ==========================================
-         4. HOW IT WORKS (3 SIMPLE STEPS)
-         ========================================== -->
-    <section class="section-wrapper" id="how-it-works">
-      <div class="section-header-center">
-        <div class="section-eyebrow">Zero Red Tape</div>
-        <h2>How CivicEye fixes civic issues in 3 simple steps</h2>
-        <p>Engineered to turn frustrated citizens into empowered city auditors with zero bureaucracy.</p>
+  </main>
+
+  <!-- ==========================================
+       TAB 2: REPORT AN ISSUE (FORM WIZARD)
+       ========================================== -->
+  <main id="tab_report" class="app-tab-panel hidden flex-1 max-w-2xl w-full mx-auto px-4 sm:px-6 py-8">
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+      
+      <div class="border-b border-slate-100 pb-4 mb-6 flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-extrabold text-slate-900">File a Civic Complaint</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Upload photo $\to$ AI auto-detects $\to$ GPS verified $\to$ Auto-dispatched</p>
+        </div>
+        <button onclick="CivicApp.switchTab('overview')" class="text-xs text-slate-400 hover:text-slate-700">Cancel</button>
       </div>
 
-      <div class="steps-grid">
-        <div class="step-card">
-          <div class="step-number-badge">1</div>
-          <h3>Snap & Upload Hazard Photo</h3>
-          <p>Take a quick phone photo. Our multimodal AI vision engine scans damage severity from 1-10, cross-verifies authentic GPS EXIF metadata, and blocks reposted fake images.</p>
+      <form id="wizardReportForm" class="space-y-5">
+        
+        <!-- Step 1: Upload Photo -->
+        <div>
+          <label class="block text-xs font-bold text-slate-800 mb-1.5">
+            1. Evidence Photo <span class="text-blue-600 font-normal">(AI scans for category, severity & authentic EXIF)</span>
+          </label>
+          <div class="relative border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-6 text-center cursor-pointer transition bg-slate-50">
+            <input id="wizardPhotoInput" name="image" type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" required />
+            
+            <div id="wizardUploadPlaceholder" class="space-y-2">
+              <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-camera"></i>
+              </div>
+              <p class="text-xs font-bold text-slate-800">Click to Snap Photo or Upload File</p>
+              <p class="text-[11px] text-slate-400">JPG, PNG format (Mobile camera supported)</p>
+            </div>
+
+            <div id="wizardImgBox" class="hidden">
+              <img id="wizardImgPreview" class="max-h-52 mx-auto rounded-xl object-cover shadow-sm" alt="Preview" />
+              <p class="text-xs text-blue-600 font-bold mt-2"><i class="fa-solid fa-rotate"></i> Change Photo</p>
+            </div>
+          </div>
+
+          <div id="wizardAiScanBox" class="hidden mt-3"></div>
         </div>
 
-        <div class="step-card">
-          <div class="step-number-badge">2</div>
-          <h3>Auto-Routed to Ward Engineers</h3>
-          <p>The system automatically clusters duplicates within 80 meters and dispatches work orders directly to Nagpur PWD, Sanitation, or Electrical field teams with a strict 24h SLA.</p>
+        <!-- Step 2: Title & Category -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-800 mb-1">Issue Headline</label>
+            <input id="wizardTitle" name="title" type="text" placeholder="e.g. Hazardous Road Pothole" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500/20" required />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-800 mb-1">Category</label>
+            <select id="wizardCategory" name="category" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-blue-500/20">
+              <option value="Pothole & Road Damage">🚧 Potholes & Roads</option>
+              <option value="Garbage & Sanitation">🗑️ Garbage & Waste</option>
+              <option value="Streetlight & Electrical">💡 Streetlights & Power</option>
+              <option value="Waterlogging & Drainage">🌊 Drainage & Flooding</option>
+              <option value="Road Obstruction & Traffic">🌳 Fallen Trees & Obstructions</option>
+              <option value="General Civic Issue">🌐 General Civic Issue</option>
+            </select>
+          </div>
         </div>
 
-        <div class="step-card">
-          <div class="step-number-badge">3</div>
-          <h3>Repaired with Before/After Proof</h3>
-          <p>The maintenance crew uploads photographic proof of resolution. AI verifies the fix, updates the public city heatmap, and awards you +50 Civic Karma points.</p>
-        </div>
-      </div>
-    </section>
+        <!-- Step 3: Location -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-bold text-slate-800">2. Confirm Location on Map</label>
+            <button type="button" id="wizardGpsBtn" class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg flex items-center gap-1 hover:bg-emerald-100 transition">
+              <i class="fa-solid fa-location-crosshairs"></i> Use GPS
+            </button>
+          </div>
 
-    <!-- ==========================================
-         5. DEEP DIVE FEATURE SHOWCASES (SLIDES)
-         ========================================== -->
+          <div id="pickerMapContainer" class="w-full h-40 rounded-xl border border-slate-200 overflow-hidden mb-2.5"></div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <input id="reportAddress" name="address" type="text" placeholder="Street Address / Road Name" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl" />
+            <select id="reportWardSelect" name="wardNumber" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-700">
+              <option value="Ward 12 - Dharampeth">Ward 12 - Dharampeth</option>
+              <option value="Ward 14 - Civil Lines">Ward 14 - Civil Lines</option>
+              <option value="Ward 15 - Sadar">Ward 15 - Sadar</option>
+              <option value="Ward 18 - Sitabuldi">Ward 18 - Sitabuldi</option>
+              <option value="Ward 22 - Medical">Ward 22 - Medical</option>
+            </select>
+          </div>
+
+          <input id="reportLat" name="latitude" type="hidden" value="21.1458" />
+          <input id="reportLng" name="longitude" type="hidden" value="79.0882" />
+        </div>
+
+        <!-- Step 4: Description -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-slate-800">3. Notes / Landmark (Optional)</label>
+            <button type="button" id="wizardVoiceBtn" class="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1 transition">
+              <i class="fa-solid fa-microphone"></i> Speak
+            </button>
+          </div>
+          <textarea id="wizardNotes" name="description" rows="2" placeholder="Nearby shop, depth, or safety concerns..." class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500/20"></textarea>
+        </div>
+
+        <!-- Step 5: Citizen Contact -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100">
+          <div>
+            <label class="block text-xs font-bold text-slate-800 mb-1">Your Name</label>
+            <input name="reporterName" type="text" value="Civic Citizen" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-800 mb-1">Mobile Number (For SMS Tracking)</label>
+            <input name="reporterPhone" type="tel" placeholder="+91 98XXX XXXXX" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+          </div>
+        </div>
+
+        <!-- Submit CTA -->
+        <button id="wizardSubmitBtn" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm shadow-sm transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i> Submit Issue (+50 Karma)
+        </button>
+
+      </form>
+    </div>
+  </main>
+
+  <!-- ==========================================
+       TAB 3: LIVE CITY MAP & FEED
+       ========================================== -->
+  <main id="tab_map" class="app-tab-panel hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
     
-    <!-- Showcase 1: Multimodal AI Vision & Anti-Fake Guardrail -->
-    <section class="section-wrapper" id="ai-vision">
-      <div class="feature-showcase-row">
-        <div class="showcase-text-col">
-          <div class="badge badge-sapphire inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 mb-3">
-            <i class="fa-solid fa-brain"></i> Multimodal AI Vision Triage
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-lg font-bold text-slate-900">Live City Hazards Map & Feed</h2>
+        <p class="text-xs text-slate-500">Real-time community complaints across central Nagpur wards</p>
+      </div>
+      <button onclick="CivicApp.switchTab('report')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl">
+        + Report Issue
+      </button>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
+      <button data-category="All" class="category-chip chip-active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white border border-transparent shrink-0 shadow-sm transition">All</button>
+      <button data-category="Pothole & Road Damage" class="category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shrink-0 transition">🚧 Potholes</button>
+      <button data-category="Garbage & Sanitation" class="category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shrink-0 transition">🗑️ Garbage</button>
+      <button data-category="Streetlight & Electrical" class="category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shrink-0 transition">💡 Lights</button>
+      <button data-category="Waterlogging & Drainage" class="category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shrink-0 transition">🌊 Drains</button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="lg:col-span-7" id="reportsFeed"></div>
+      
+      <div class="lg:col-span-5">
+        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm sticky top-20">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-bold text-xs text-slate-800">Interactive Map View</h4>
+            <div class="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[10px] font-semibold">
+              <button onclick="CivicMap.switchMapLayer('street')" class="px-2 py-0.5 rounded bg-white text-blue-700 font-bold">Street</button>
+              <button onclick="CivicMap.switchMapLayer('satellite')" class="px-2 py-0.5 rounded text-slate-600">Satellite</button>
+            </div>
           </div>
-          <h3>Instant damage classification & anti-fake image protection</h3>
-          <p>
-            No more manual municipal sorting. CivicEye's vision models instantly identify asphalt craters, illegal waste piles, hanging electrical cables, and flooded culverts in milliseconds.
+          <div id="mapContainer" class="w-full min-h-[460px] rounded-xl overflow-hidden border border-slate-200"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==========================================
+       TAB 4: TRACK COMPLAINT BY ID
+       ========================================== -->
+  <main id="tab_track" class="app-tab-panel hidden flex-1 max-w-2xl w-full mx-auto px-4 sm:px-6 py-8">
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm mb-6">
+      <h2 class="text-xl font-bold text-slate-900 mb-1">Track Complaint Progress</h2>
+      <p class="text-xs text-slate-500 mb-4">Enter your ticket code to view live dispatch milestones and officer contact</p>
+
+      <div class="flex gap-2 max-w-lg mb-3">
+        <input id="trackTicketInput" type="text" placeholder="e.g. CE-2609-A8F29B" class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500/20" />
+        <button onclick="CivicApp.trackTicketDirectly(document.getElementById('trackTicketInput').value)" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition">
+          Track
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2 text-[11px] text-slate-500">
+        <span>Sample tickets:</span>
+        <button onclick="CivicApp.trackTicketDirectly('CE-2609-A8F29B')" class="font-mono font-bold text-blue-600 hover:underline">CE-2609-A8F29B</button>
+        <span>•</span>
+        <button onclick="CivicApp.trackTicketDirectly('CE-2609-F91A80')" class="font-mono font-bold text-blue-600 hover:underline">CE-2609-F91A80</button>
+      </div>
+    </div>
+
+    <div id="ticketTrackResult"></div>
+  </main>
+
+  <!-- ==========================================
+       TAB 5: PROOF OF WORK & CIVIC KARMA
+       ========================================== -->
+  <main id="tab_karma" class="app-tab-panel hidden flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8">
+    
+    <!-- Before & After Proof of Work -->
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded uppercase">Photographic Verification</span>
+          <h3 class="text-lg font-extrabold text-slate-900 mt-1">Recently Solved Issues (Before vs. After)</h3>
+        </div>
+        <span class="font-mono font-bold text-xs text-blue-700 bg-blue-50 px-2.5 py-1 rounded border border-blue-200">CE-2609-F91A80</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        <div class="md:col-span-7">
+          <!-- Drag comparison slider -->
+          <div id="homeSliderBox" class="comparison-slider-container">
+            <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=800" class="comparison-before-img" alt="After Repair"/>
+            <img id="homeAfterImgLayer" src="https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?w=800" class="comparison-after-img" alt="Before Repair"/>
+            <div id="homeSliderHandle" class="comparison-handle">
+              <i class="fa-solid fa-arrows-left-right"></i>
+            </div>
+          </div>
+          <p class="text-center text-[11px] text-slate-500 mt-2 font-medium">↔ Drag slider left/right to inspect repair quality</p>
+        </div>
+
+        <div class="md:col-span-5 space-y-3 text-xs text-slate-700">
+          <h4 class="font-bold text-slate-900 text-sm">Broken Streetlight & Exposed Wiring Repaired</h4>
+          <p class="text-slate-600 leading-relaxed">
+            Reported on Temple Road, Civil Lines. Electrical maintenance crew replaced bent pole and installed a new 90W LED luminaire within 12 hours.
           </p>
-          <div class="showcase-bullets">
-            <div class="showcase-bullet-item flex items-start gap-2.5 text-xs text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
-              <span><strong>Automated Severity Scoring (1-10):</strong> Priority is calculated dynamically from depth, structural hazard, and proximity to schools/hospitals.</span>
-            </div>
-            <div class="showcase-bullet-item flex items-start gap-2.5 text-xs text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
-              <span><strong>Anti-Fake & Replay Defense:</strong> Inspects EXIF timestamps and optical artifacts to prevent internet stock photo spoofing.</span>
-            </div>
-            <div class="showcase-bullet-item flex items-start gap-2.5 text-xs text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
-              <span><strong>Zero-Config Offline Fallback:</strong> Operates seamlessly with local heuristic engines even during low network bandwidth.</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="showcase-card-visual">
-          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex justify-between items-center mb-3">
-              <span class="text-xs font-bold text-slate-400 uppercase">Live AI Inspection Engine</span>
-              <span class="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">Confidence: 98.6%</span>
-            </div>
-
-            <div class="space-y-2.5">
-              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
-                <div class="flex items-center gap-2">
-                  <span class="text-lg">🚧</span>
-                  <div>
-                    <strong class="text-slate-800 block">Identified: Road Crater Pothole</strong>
-                    <span class="text-[11px] text-slate-400">Safety Risk: Severe Vehicle Axle Damage</span>
-                  </div>
-                </div>
-                <span class="font-mono font-bold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded">Level 8.5</span>
-              </div>
-
-              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
-                <div class="flex items-center gap-2">
-                  <span class="text-lg">🛡️</span>
-                  <div>
-                    <strong class="text-slate-800 block">Authenticity Check</strong>
-                    <span class="text-[11px] text-emerald-600 font-semibold">Valid Camera Sensor EXIF • Live Capture</span>
-                  </div>
-                </div>
-                <span class="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Genuine</span>
-              </div>
-
-              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
-                <div class="flex items-center gap-2">
-                  <span class="text-lg">🏢</span>
-                  <div>
-                    <strong class="text-slate-800 block">Target Department Dispatch</strong>
-                    <span class="text-[11px] text-slate-500">Public Works Dept (PWD Nagpur Zone 2)</span>
-                  </div>
-                </div>
-                <span class="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">Auto-Assigned</span>
-              </div>
-            </div>
+          <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900 font-semibold flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+            <span>Verified Fixed by Municipal Inspector</span>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Showcase 2: Geospatial Ward Intelligence & Heatmaps -->
-      <div class="feature-showcase-row reverse mt-16" id="live-map">
-        <div class="showcase-text-col">
-          <div class="badge badge-emerald inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 mb-3">
-            <i class="fa-solid fa-map-location-dot"></i> Geospatial Ward Intelligence
-          </div>
-          <h3>Real-time spatial clustering & duplicate merge engine</h3>
-          <p>
-            When 20 neighbors photograph the same pothole on Temple Road, CivicEye merges them within an 80-meter radius instead of clogging municipal queues with duplicate tickets.
-          </p>
-          <div class="showcase-bullets">
-            <div class="showcase-bullet-item flex items-start gap-2.5 text-xs text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
-              <span><strong>80m Spatial Deduplication:</strong> Haversine mathematical clustering consolidates repetitive citizen submissions.</span>
-            </div>
-            <div class="showcase-bullet-item flex items-start gap-2.5 text-xs text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
-              <span><strong>Ward Boundary Auto-Pin:</strong> Maps complaints directly to Dharampeth, Civil Lines, Sadar, or Sitabuldi ward engineers.</span>
-            </div>
-            <div class="showcase-bullet-item flex items-start gap-2.5 text-xs text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
-              <span><strong>Interactive Leaflet Layers:</strong> Toggle between crisp OpenStreetMap Street navigation and high-res Satellite imagery.</span>
-            </div>
+    <!-- Citizen Karma Status -->
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase">Your Civic Standing</span>
+          <div class="text-2xl font-black text-slate-900 flex items-center gap-1.5 mt-0.5">
+            <i class="fa-solid fa-gem text-blue-600"></i>
+            <span id="userKarmaBadge">140 Karma</span>
           </div>
         </div>
+        <span class="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-xl">
+          ⭐ Level 3 Ward Guardian
+        </span>
+      </div>
 
-        <div class="showcase-card-visual">
-          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex justify-between items-center mb-3">
-              <strong class="text-xs text-slate-800">Nagpur Central Ward Activity</strong>
-              <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">4 Wards Active</span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2.5 text-xs mb-3">
-              <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-                <div class="text-[10px] text-slate-400 font-bold">Dharampeth (Ward 12)</div>
-                <div class="font-extrabold text-slate-800 text-sm mt-0.5">14 Active</div>
-                <div class="text-[10px] text-emerald-600 font-semibold">92% SLA Met</div>
-              </div>
-              <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-                <div class="text-[10px] text-slate-400 font-bold">Civil Lines (Ward 14)</div>
-                <div class="font-extrabold text-slate-800 text-sm mt-0.5">8 Active</div>
-                <div class="text-[10px] text-emerald-600 font-semibold">98% SLA Met</div>
-              </div>
-              <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-                <div class="text-[10px] text-slate-400 font-bold">Sadar Bazaar (Ward 15)</div>
-                <div class="font-extrabold text-slate-800 text-sm mt-0.5">19 Active</div>
-                <div class="text-[10px] text-blue-600 font-semibold">89% SLA Met</div>
-              </div>
-              <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-                <div class="text-[10px] text-slate-400 font-bold">Sitabuldi (Ward 18)</div>
-                <div class="font-extrabold text-slate-800 text-sm mt-0.5">11 Active</div>
-                <div class="text-[10px] text-emerald-600 font-semibold">95% SLA Met</div>
-              </div>
-            </div>
-
-            <button onclick="CivicApp.scrollToCockpit('feed')" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
-              <i class="fa-solid fa-map"></i> Open Full Interactive Map Cockpit ↗
-            </button>
-          </div>
+      <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 mb-4">
+        <div class="flex justify-between text-xs font-semibold">
+          <span class="text-slate-600">Progress to City Champion</span>
+          <span class="text-blue-600">140 / 300 Pts</span>
+        </div>
+        <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+          <div class="bg-blue-600 h-full w-[46.6%]"></div>
         </div>
       </div>
 
-      <!-- Showcase 3: Before & After Photographic Proof of Work -->
-      <div class="feature-showcase-row mt-16" id="before-after">
-        <div class="showcase-text-col">
-          <div class="badge badge-amber inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 mb-3">
-            <i class="fa-solid fa-camera-rotate"></i> Photographic Proof of Work
-          </div>
-          <h3>Transparent municipal resolution with verifiable proof</h3>
-          <p>
-            No more ghost closures. When a municipal crew marks an issue as resolved, they must upload an authentic post-repair photo. Citizens can inspect the fix with the interactive slider.
-          </p>
-          <div class="showcase-bullets">
-            <div class="showcase-bullet-item flex items-start gap-2.5 text-xs text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
-              <span><strong>Interactive Split-Screen Slider:</strong> Slide between the initial citizen complaint photo and the completed road resurfacing.</span>
-            </div>
-            <div class="showcase-bullet-item flex items-start gap-2.5 text-xs text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
-              <span><strong>Digital Verification Timestamp:</strong> Official field crew timestamp, engineer badge ID, and inspector sign-off.</span>
-            </div>
-            <div class="showcase-bullet-item flex items-start gap-2.5 text-xs text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
-              <span><strong>Citizen Re-open Protection:</strong> If the patch fails, citizens can dispute the resolution with one tap.</span>
-            </div>
-          </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <div class="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl flex justify-between items-center text-emerald-900">
+          <span>📸 Verified Report Submitted</span>
+          <strong class="font-bold text-emerald-700">+50 Pts</strong>
         </div>
-
-        <div class="showcase-card-visual">
-          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex justify-between items-center mb-3">
-              <span class="font-mono font-bold text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">CE-2609-F91A80</span>
-              <span class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200"><i class="fa-solid fa-circle-check text-emerald-600"></i> Verified Repaired</span>
-            </div>
-
-            <!-- Drag Comparison Slider -->
-            <div id="homeSliderBox" class="comparison-slider-container">
-              <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=800" class="comparison-before-img" alt="After Repair" />
-              <img id="homeAfterImgLayer" src="https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?w=800" class="comparison-after-img" alt="Before Repair" />
-              <div id="homeSliderHandle" class="comparison-handle">
-                <i class="fa-solid fa-arrows-left-right"></i>
-              </div>
-            </div>
-            <p class="text-center text-[11px] text-slate-500 mt-2 font-medium">↔ Drag slider left/right to compare Before vs. After</p>
-
-            <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
-              <strong>Location:</strong> Temple Road, Civil Lines • <strong>Resolution Time:</strong> 11.5 Hours
-            </div>
-          </div>
+        <div class="p-3 bg-blue-50/80 border border-blue-200 rounded-xl flex justify-between items-center text-blue-900">
+          <span>👍 Community Upvote on Hazard</span>
+          <strong class="font-bold text-blue-700">+10 Pts</strong>
         </div>
       </div>
+    </div>
 
-      <!-- Showcase 4: Civic Karma, Community Upvotes & Badges -->
-      <div class="feature-showcase-row reverse mt-16" id="civic-karma">
-        <div class="showcase-text-col">
-          <div class="badge badge-sapphire inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 mb-3">
-            <i class="fa-solid fa-medal"></i> Civic Karma & Community Rewards
-          </div>
-          <h3>Turn community care into recognized civic standing</h3>
-          <p>
-            Build your civic reputation as a responsible citizen. Earn Karma points for verified hazard submissions, upvote critical issues near you, and level up from Ward Watcher to City Guardian.
-          </p>
-          <div class="showcase-bullets">
-            <div class="showcase-bullet-item flex items-start gap-2.5 text-xs text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
-              <span><strong>+50 Karma per Verified Report:</strong> Earn instant points when your photo passes AI authenticity checks.</span>
-            </div>
-            <div class="showcase-bullet-item flex items-start gap-2.5 text-xs text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
-              <span><strong>Community Upvote Priority Boost:</strong> Upvoting critical road hazards escalates dispatch priority to top urgency.</span>
-            </div>
-            <div class="showcase-bullet-item flex items-start gap-2.5 text-xs text-slate-700">
-              <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
-              <span><strong>Printable Official Acknowledgment Slips:</strong> Download PDF grievance receipts with unique verification QR codes.</span>
-            </div>
-          </div>
-        </div>
+  </main>
 
-        <div class="showcase-card-visual">
-          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex justify-between items-center mb-4">
-              <div>
-                <span class="text-[10px] font-bold text-slate-400 uppercase">Citizen Standing</span>
-                <div class="text-xl font-black text-slate-900 flex items-center gap-1.5 mt-0.5">
-                  <i class="fa-solid fa-gem text-blue-600"></i>
-                  <span id="userKarmaBadge">140 Karma</span>
-                </div>
-              </div>
-              <span class="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1 rounded-xl">
-                ⭐ Level 3 Ward Guardian
-              </span>
-            </div>
-
-            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 mb-3">
-              <div class="flex justify-between text-xs font-semibold">
-                <span class="text-slate-600">Progress to City Champion</span>
-                <span class="text-blue-600">140 / 300 Pts</span>
-              </div>
-              <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                <div class="bg-blue-600 h-full w-[46.6%]"></div>
-              </div>
-            </div>
-
-            <div class="space-y-1.5 text-xs text-slate-600">
-              <div class="flex items-center justify-between p-2 bg-emerald-50/70 border border-emerald-200 rounded-lg text-emerald-900">
-                <span>📸 Pothole Report Verified</span>
-                <strong class="font-bold text-emerald-700">+50 Pts</strong>
-              </div>
-              <div class="flex items-center justify-between p-2 bg-blue-50/70 border border-blue-200 rounded-lg text-blue-900">
-                <span>👍 Community Upvote on Sadar Drain</span>
-                <strong class="font-bold text-blue-700">+10 Pts</strong>
-              </div>
-            </div>
-          </div>
-        </div>
+  <!-- ==========================================
+       TAB 6: OFFICER PORTAL
+       ========================================== -->
+  <main id="tab_officer" class="app-tab-panel hidden flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Municipal Officer Dispatch Cockpit</h2>
+        <p class="text-xs text-slate-500">Update ticket statuses, assign field crews, and inspect before/after photos</p>
       </div>
-    </section>
+      <button onclick="CivicApp.resetDemoData()" class="text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg">
+        Reset Demo Data
+      </button>
+    </div>
 
-    <!-- ==========================================
-         6. EMBEDDED INTERACTIVE LIVE APP COCKPIT
-         ========================================== -->
-    <section class="section-wrapper" id="app-cockpit">
-      <div class="section-header-center">
-        <div class="section-eyebrow">Try It Live Right Now</div>
-        <h2>Interactive Municipal App Cockpit</h2>
-        <p>File a hazard, view the live Leaflet map, track any ticket code, or explore the officer dispatch portal below.</p>
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-5">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase font-bold">
+              <th class="py-3 px-4">Ticket ID</th>
+              <th class="py-3 px-4">Issue Description</th>
+              <th class="py-3 px-4">Ward</th>
+              <th class="py-3 px-4">Priority</th>
+              <th class="py-3 px-4">Status Action</th>
+              <th class="py-3 px-4">Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminDispatchTableBody"></tbody>
+        </table>
       </div>
-
-      <!-- Segmented Cockpit Tab Bar -->
-      <div class="max-w-4xl mx-auto mb-6">
-        <div class="bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-center gap-1 sm:gap-2">
-          <button id="cockpitTabBtn_report" onclick="CivicApp.switchCockpitTab('report')" class="cockpit-tab-btn flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 bg-blue-600 text-white shadow-sm">
-            <i class="fa-solid fa-camera"></i>
-            <span>File Complaint</span>
-          </button>
-          
-          <button id="cockpitTabBtn_feed" onclick="CivicApp.switchCockpitTab('feed')" class="cockpit-tab-btn flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 text-slate-600 hover:bg-slate-100">
-            <i class="fa-solid fa-map-location-dot"></i>
-            <span>Map & Live Feed</span>
-          </button>
-
-          <button id="cockpitTabBtn_track" onclick="CivicApp.switchCockpitTab('track')" class="cockpit-tab-btn flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 text-slate-600 hover:bg-slate-100">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <span>Track by Ticket ID</span>
-          </button>
-
-          <button id="cockpitTabBtn_officer" onclick="CivicApp.switchCockpitTab('officer')" class="cockpit-tab-btn flex-1 min-w-[140px] py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 text-slate-600 hover:bg-slate-100">
-            <i class="fa-solid fa-user-shield text-purple-600"></i>
-            <span>Officer Dispatch</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- TAB PANEL 1: REPORT AN ISSUE -->
-      <div id="cockpitPanel_report" class="cockpit-panel max-w-2xl mx-auto">
-        <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-          <div class="border-b border-slate-100 pb-4 mb-6">
-            <h3 class="text-lg font-extrabold text-slate-900">File a New Civic Complaint</h3>
-            <p class="text-xs text-slate-500 mt-0.5">Upload a photo $\to$ AI auto-scans category & severity $\to$ GPS pinned $\to$ Dispatched</p>
-          </div>
-
-          <form id="wizardReportForm" class="space-y-5">
-            <!-- Upload Photo -->
-            <div>
-              <label class="block text-xs font-bold text-slate-800 mb-1.5">
-                1. Evidence Photo <span class="text-blue-600 font-normal">(AI scans for category, severity & authentic EXIF)</span>
-              </label>
-              <div class="relative border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-6 text-center cursor-pointer transition bg-slate-50">
-                <input id="wizardPhotoInput" name="image" type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" required />
-                
-                <div id="wizardUploadPlaceholder" class="space-y-2">
-                  <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto text-xl">
-                    <i class="fa-solid fa-camera"></i>
-                  </div>
-                  <p class="text-xs font-bold text-slate-800">Click to Snap Photo or Upload File</p>
-                  <p class="text-[11px] text-slate-400">JPG, PNG format (Mobile camera supported)</p>
-                </div>
-
-                <div id="wizardImgBox" class="hidden">
-                  <img id="wizardImgPreview" class="max-h-52 mx-auto rounded-xl object-cover shadow-sm" alt="Preview" />
-                  <p class="text-xs text-blue-600 font-bold mt-2"><i class="fa-solid fa-rotate"></i> Change Photo</p>
-                </div>
-              </div>
-
-              <div id="wizardAiScanBox" class="hidden mt-3"></div>
-            </div>
-
-            <!-- Title & Category -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-bold text-slate-800 mb-1">Issue Headline</label>
-                <input id="wizardTitle" name="title" type="text" placeholder="e.g. Hazardous Road Pothole" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500/20" required />
-              </div>
-
-              <div>
-                <label class="block text-xs font-bold text-slate-800 mb-1">Category</label>
-                <select id="wizardCategory" name="category" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-blue-500/20">
-                  <option value="Pothole & Road Damage">🚧 Potholes & Roads</option>
-                  <option value="Garbage & Sanitation">🗑️ Garbage & Waste</option>
-                  <option value="Streetlight & Electrical">💡 Streetlights & Power</option>
-                  <option value="Waterlogging & Drainage">🌊 Drainage & Flooding</option>
-                  <option value="Road Obstruction & Traffic">🌳 Fallen Trees & Obstructions</option>
-                  <option value="General Civic Issue">🌐 General Civic Issue</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Location -->
-            <div>
-              <div class="flex items-center justify-between mb-1.5">
-                <label class="block text-xs font-bold text-slate-800">2. Confirm Location on Map</label>
-                <button type="button" id="wizardGpsBtn" class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg flex items-center gap-1 hover:bg-emerald-100 transition">
-                  <i class="fa-solid fa-location-crosshairs"></i> Use GPS
-                </button>
-              </div>
-
-              <div id="pickerMapContainer" class="w-full h-40 rounded-xl border border-slate-200 overflow-hidden mb-2.5"></div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <input id="reportAddress" name="address" type="text" placeholder="Street Address / Road Name" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl" />
-                <select id="reportWardSelect" name="wardNumber" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-700">
-                  <option value="Ward 12 - Dharampeth">Ward 12 - Dharampeth</option>
-                  <option value="Ward 14 - Civil Lines">Ward 14 - Civil Lines</option>
-                  <option value="Ward 15 - Sadar">Ward 15 - Sadar</option>
-                  <option value="Ward 18 - Sitabuldi">Ward 18 - Sitabuldi</option>
-                  <option value="Ward 22 - Medical">Ward 22 - Medical</option>
-                </select>
-              </div>
-
-              <input id="reportLat" name="latitude" type="hidden" value="21.1458" />
-              <input id="reportLng" name="longitude" type="hidden" value="79.0882" />
-            </div>
-
-            <!-- Description & Voice -->
-            <div>
-              <div class="flex items-center justify-between mb-1">
-                <label class="block text-xs font-bold text-slate-800">3. Notes / Landmark (Optional)</label>
-                <button type="button" id="wizardVoiceBtn" class="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1 transition">
-                  <i class="fa-solid fa-microphone"></i> Speak
-                </button>
-              </div>
-              <textarea id="wizardNotes" name="description" rows="2" placeholder="Nearby landmark, depth, or safety concerns..." class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500/20"></textarea>
-            </div>
-
-            <!-- Citizen Contact -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100">
-              <div>
-                <label class="block text-xs font-bold text-slate-800 mb-1">Your Name</label>
-                <input name="reporterName" type="text" value="Civic Citizen" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-800 mb-1">Mobile Number (For SMS Tracking)</label>
-                <input name="reporterPhone" type="tel" placeholder="+91 98XXX XXXXX" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
-              </div>
-            </div>
-
-            <!-- Submit CTA -->
-            <button id="wizardSubmitBtn" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm shadow-sm transition flex items-center justify-center gap-2">
-              <i class="fa-solid fa-paper-plane"></i> Submit Issue (+50 Karma)
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <!-- TAB PANEL 2: LIVE MAP & FEED -->
-      <div id="cockpitPanel_feed" class="cockpit-panel hidden max-w-6xl mx-auto">
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h3 class="text-lg font-bold text-slate-900">City Issues Map & Feed</h3>
-            <p class="text-xs text-slate-500">Live community complaints across Nagpur wards</p>
-          </div>
-          <button onclick="CivicApp.switchCockpitTab('report')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl">
-            + Report Hazard
-          </button>
-        </div>
-
-        <!-- Filter Chips -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
-          <button data-category="All" class="category-chip chip-active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white border border-transparent shrink-0 shadow-sm transition">All</button>
-          <button data-category="Pothole & Road Damage" class="category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shrink-0 transition">🚧 Potholes</button>
-          <button data-category="Garbage & Sanitation" class="category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shrink-0 transition">🗑️ Garbage</button>
-          <button data-category="Streetlight & Electrical" class="category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shrink-0 transition">💡 Lights</button>
-          <button data-category="Waterlogging & Drainage" class="category-chip px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shrink-0 transition">🌊 Drains</button>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div class="lg:col-span-7" id="reportsFeed"></div>
-          
-          <div class="lg:col-span-5">
-            <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm sticky top-20">
-              <div class="flex items-center justify-between mb-2">
-                <h4 class="font-bold text-xs text-slate-800">Interactive Map</h4>
-                <div class="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[10px] font-semibold">
-                  <button onclick="CivicMap.switchMapLayer('street')" class="px-2 py-0.5 rounded bg-white text-blue-700 font-bold">Street</button>
-                  <button onclick="CivicMap.switchMapLayer('satellite')" class="px-2 py-0.5 rounded text-slate-600">Satellite</button>
-                </div>
-              </div>
-              <div id="mapContainer" class="w-full min-h-[460px] rounded-xl overflow-hidden border border-slate-200"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB PANEL 3: TRACK COMPLAINT BY ID -->
-      <div id="cockpitPanel_track" class="cockpit-panel hidden max-w-2xl mx-auto">
-        <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm mb-6">
-          <h3 class="text-xl font-bold text-slate-900 mb-1">Track Complaint Progress</h3>
-          <p class="text-xs text-slate-500 mb-4">Enter your ticket code to view live dispatch milestones and officer contact</p>
-
-          <div class="flex gap-2 max-w-lg mb-3">
-            <input id="trackTicketInput" type="text" placeholder="e.g. CE-2609-A8F29B" class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500/20" />
-            <button onclick="CivicApp.trackTicketDirectly(document.getElementById('trackTicketInput').value)" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition">
-              Track
-            </button>
-          </div>
-
-          <div class="flex items-center gap-2 text-[11px] text-slate-500">
-            <span>Sample tickets:</span>
-            <button onclick="CivicApp.trackTicketDirectly('CE-2609-A8F29B')" class="font-mono font-bold text-blue-600 hover:underline">CE-2609-A8F29B</button>
-            <span>•</span>
-            <button onclick="CivicApp.trackTicketDirectly('CE-2609-F91A80')" class="font-mono font-bold text-blue-600 hover:underline">CE-2609-F91A80</button>
-          </div>
-        </div>
-
-        <div id="ticketTrackResult"></div>
-      </div>
-
-      <!-- TAB PANEL 4: OFFICER DISPATCH PORTAL -->
-      <div id="cockpitPanel_officer" class="cockpit-panel hidden max-w-5xl mx-auto">
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h3 class="text-xl font-bold text-slate-900">Municipal Officer Dispatch Cockpit</h3>
-            <p class="text-xs text-slate-500">Update ticket statuses, assign field crews, and inspect before/after photos</p>
-          </div>
-          <button onclick="CivicApp.resetDemoData()" class="text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg">
-            Reset Demo Data
-          </button>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-5">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase font-bold">
-                  <th class="py-3 px-4">Ticket ID</th>
-                  <th class="py-3 px-4">Issue Description</th>
-                  <th class="py-3 px-4">Ward</th>
-                  <th class="py-3 px-4">Priority</th>
-                  <th class="py-3 px-4">Status Action</th>
-                  <th class="py-3 px-4">Action</th>
-                </tr>
-              </thead>
-              <tbody id="adminDispatchTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==========================================
-         7. FAQ ACCORDION
-         ========================================== -->
-    <section class="section-wrapper" id="faq">
-      <div class="section-header-center">
-        <div class="section-eyebrow">Got Questions?</div>
-        <h2>Frequently Asked Questions</h2>
-        <p>Everything you need to know about CivicEye, AI verification, and municipal SLAs.</p>
-      </div>
-
-      <div class="faq-accordion max-w-3xl mx-auto space-y-3">
-        <!-- FAQ 1 -->
-        <div class="faq-item bg-white border border-slate-200 rounded-2xl overflow-hidden transition shadow-2xs">
-          <button onclick="CivicApp.toggleFaq(this)" class="faq-question w-full p-4 text-left font-bold text-sm text-slate-800 flex items-center justify-between gap-4">
-            <span>How does CivicEye stop people from uploading fake or internet photos?</span>
-            <i class="faq-icon fa-solid fa-chevron-down text-xs text-slate-400 transition-transform"></i>
-          </button>
-          <div class="faq-answer hidden px-4 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-            CivicEye runs every image through an AI multimodal authenticity filter that inspects EXIF camera metadata, capture timestamps, and optical anomalies. If a photo is an internet meme, stock image, or already reported duplicate, it is flagged instantly.
-          </div>
-        </div>
-
-        <!-- FAQ 2 -->
-        <div class="faq-item bg-white border border-slate-200 rounded-2xl overflow-hidden transition shadow-2xs">
-          <button onclick="CivicApp.toggleFaq(this)" class="faq-question w-full p-4 text-left font-bold text-sm text-slate-800 flex items-center justify-between gap-4">
-            <span>What is the standard resolution SLA for city hazards?</span>
-            <i class="faq-icon fa-solid fa-chevron-down text-xs text-slate-400 transition-transform"></i>
-          </button>
-          <div class="faq-answer hidden px-4 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-            High-severity issues (depth &gt;10cm potholes, exposed power lines) have a strict 24-hour target turnaround. General sanitation and drainage issues are prioritized within 48 hours. If an SLA breaches, the ticket auto-escalates to the Chief Municipal Engineer.
-          </div>
-        </div>
-
-        <!-- FAQ 3 -->
-        <div class="faq-item bg-white border border-slate-200 rounded-2xl overflow-hidden transition shadow-2xs">
-          <button onclick="CivicApp.toggleFaq(this)" class="faq-question w-full p-4 text-left font-bold text-sm text-slate-800 flex items-center justify-between gap-4">
-            <span>Can I report an issue without logging in?</span>
-            <i class="faq-icon fa-solid fa-chevron-down text-xs text-slate-400 transition-transform"></i>
-          </button>
-          <div class="faq-answer hidden px-4 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-            Yes! You can file complaints anonymously as a guest. Entering your phone number is optional and enables instant SMS milestone updates when field workers reach the site and fix the hazard.
-          </div>
-        </div>
-
-        <!-- FAQ 4 -->
-        <div class="faq-item bg-white border border-slate-200 rounded-2xl overflow-hidden transition shadow-2xs">
-          <button onclick="CivicApp.toggleFaq(this)" class="faq-question w-full p-4 text-left font-bold text-sm text-slate-800 flex items-center justify-between gap-4">
-            <span>How does the 80m proximity duplicate merge work?</span>
-            <i class="faq-icon fa-solid fa-chevron-down text-xs text-slate-400 transition-transform"></i>
-          </button>
-          <div class="faq-answer hidden px-4 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-            If multiple residents report the same broken streetlight or pothole within an 80-meter spatial radius, CivicEye clusters the reports together under a primary master ticket. Each citizen's report adds an upvote to escalate priority without creating duplicate work orders.
-          </div>
-        </div>
-
-        <!-- FAQ 5 -->
-        <div class="faq-item bg-white border border-slate-200 rounded-2xl overflow-hidden transition shadow-2xs">
-          <button onclick="CivicApp.toggleFaq(this)" class="faq-question w-full p-4 text-left font-bold text-sm text-slate-800 flex items-center justify-between gap-4">
-            <span>What are Civic Karma points used for?</span>
-            <i class="faq-icon fa-solid fa-chevron-down text-xs text-slate-400 transition-transform"></i>
-          </button>
-          <div class="faq-answer hidden px-4 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-            Civic Karma reflects your verified contribution to municipal upkeep. Top-tier citizens receive invitations to ward town halls, official digital citizen certificates, and fast-track priority on future submissions.
-          </div>
-        </div>
-      </div>
-    </section>
+    </div>
   </main>
 
   <!-- CITIZEN AUTH MODAL -->
@@ -846,52 +621,11 @@
   <!-- Toast Notification Container -->
   <div id="toastContainer"></div>
 
-  <!-- ==========================================
-       8. MODERN FOOTER
-       ========================================== -->
-  <footer class="bg-white border-t border-slate-200 mt-20 py-12 text-xs text-slate-600">
-    <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-      <div class="md:col-span-2 space-y-3">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
-            <i class="fa-solid fa-eye"></i>
-          </div>
-          <span class="text-base font-extrabold text-slate-900">CivicEye</span>
-          <span class="badge-pill">Municipal AI OS</span>
-        </div>
-        <p class="text-slate-500 max-w-sm leading-relaxed">
-          Empowering citizens with AI vision triage, geospatial duplicate clustering, and transparent 24h municipal SLA tracking.
-        </p>
-        <div class="text-[11px] text-slate-400">
-          Municipal Helpline: <strong>1800-233-3762</strong> • Control Room 24x7
-        </div>
-      </div>
-
-      <div>
-        <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider mb-3">Quick Navigation</h4>
-        <ul class="space-y-2 text-slate-500">
-          <li><a href="#how-it-works" class="hover:text-blue-600 transition">How It Works</a></li>
-          <li><a href="#ai-vision" class="hover:text-blue-600 transition">AI Vision Engine</a></li>
-          <li><a href="#live-map" class="hover:text-blue-600 transition">Geospatial Map</a></li>
-          <li><a href="#before-after" class="hover:text-blue-600 transition">Proof of Work</a></li>
-          <li><a href="#civic-karma" class="hover:text-blue-600 transition">Karma Rewards</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider mb-3">Interactive App</h4>
-        <ul class="space-y-2 text-slate-500">
-          <li><a href="#app-cockpit" onclick="CivicApp.switchCockpitTab('report')" class="hover:text-blue-600 transition">File New Complaint</a></li>
-          <li><a href="#app-cockpit" onclick="CivicApp.switchCockpitTab('feed')" class="hover:text-blue-600 transition">Live Ward Feed</a></li>
-          <li><a href="#app-cockpit" onclick="CivicApp.switchCockpitTab('track')" class="hover:text-blue-600 transition">Track Ticket Progress</a></li>
-          <li><a href="#app-cockpit" onclick="CivicApp.switchCockpitTab('officer')" class="hover:text-blue-600 transition">Officer Dispatch Portal</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="max-w-6xl mx-auto px-4 pt-6 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-2 text-slate-400">
-      <span>© 2026 CivicEye AI • Nagpur Smart City Municipal Corporation</span>
-      <span>Built with ❤️ by <strong class="text-slate-700">Kaveri Jadhao</strong></span>
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-auto py-6 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-2">
+      <span>CivicEye Nagpur • Municipal AI Redressal Platform</span>
+      <span>Built with ❤️ by <strong>Kaveri Jadhao</strong></span>
     </div>
   </footer>
 
